@@ -3,7 +3,7 @@ const router = express.Router();
 
 router.get('/', (req, res, next) => {
     res.status(200).send({
-        mensagem: 'Rota GET de pedido'
+        mensagem: 'Rota GET de pedidos'
     });
 });
 
@@ -12,7 +12,6 @@ router.post('/', (req, res, next) => {
         mensagem: 'Rota POST de pedido'
     });
 });
-
 
 router.delete('/', (req, res, next) => {
     res.status(201).send({
@@ -28,6 +27,5 @@ router.get('/:id_produto', (req, res, next) => {
         id: id
     });
 });
-
 
 module.exports = router;
