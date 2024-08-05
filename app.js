@@ -2,27 +2,38 @@ const express = require('express');
 const app = express();
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
+const { connectToDatabase, client } = require('./db');
 
 const rotaProdutos = require('./routes/produtos');
 const rotaPedido = require('./routes/pedidos');
 
 app.use(morgan('dev'));
-app.use(bodyParser.urlencoded({ extended: false}));
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header(
-        'Access-Control-Allow-Header',
-        'Origin, X-Requrested-With, Content-Type, Accept, Authorization'
+        'Access-Control-Allow-Headers',
+        'Origin, X-Requested-With, Content-Type, Accept, Authorization'
     );
 
-    if (req.method == 'OPTIONS'){
+    if (req.method === 'OPTIONS') {
         res.header('Access-Control-Allow-Methods', 'POST, PUT, PATCH, DELETE, GET');
         return res.status(200).send({});
     }
 
     next();
+});
+
+app.use(async (req, res, next) => {
+    try {
+        await connectToDatabase();
+        req.dbClient = client;
+        next();
+    } catch (err) {
+        next(err);
+    }
 });
 
 app.use('/produtos', rotaProdutos);

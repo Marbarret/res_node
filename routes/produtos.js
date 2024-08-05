@@ -1,52 +1,55 @@
 const express = require('express');
 const router = express.Router();
 
-router.get('/', (req, res, next) => {
-    res.status(200).send({
-        mensagem: 'Rota GET de produtos'
-    });
-});
+router.get('/', async (req, res, next) => {
+    try {
+        const db = req.dbClient.db('curso');
+        const collection = db.collection('modulo');
+        const cursos = await collection.find({}).toArray();
+        if (cursos.length === 0) {
+            console.warn('Nenhum produto encontrado na coleção');
+        }
 
-router.post('/', (req, res, next) => {
-
-    const produto = {
-        nome: req.body.nome,
-        descricao: req.body.descricao
+        res.status(200).json(cursos);
+    } catch (err) {
+        console.error('Erro ao buscar cursos:', err);
+        res.status(500).json({ mensagem: 'Erro ao buscar Cursos', erro: err });
     }
-
-    res.status(201).send({
-        mensagem: 'Rota POST de produtos',
-        produtoNovo: produto
-    });
 });
 
-router.patch('/', (req, res, next) => {
-    res.status(201).send({
-        mensagem: 'Rota PATCH de produtos'
-    });
+router.post('/', async (req, res, next) => {
+    try {
+        const db = req.dbClient.db('curso');
+        const collection = db.collection('modulo');
+
+        const novoCurso = {
+            nome: req.body.nome,
+            descricao: req.body.descricao,
+            instrutor: req.body.instrutor,
+            duracao: req.body.duracao,
+            valor: req.body.valor
+        };
+
+        const result = await collection.insertOne(novoCurso);
+        res.status(201).json(result);
+    } catch (err) {
+        res.status(500).json({ mensagem: 'Erro ao criar produto', erro: err });
+    }
 });
 
 router.delete('/', (req, res, next) => {
     res.status(201).send({
-        mensagem: 'Rota DELETE de produtos'
+        mensagem: 'Rota DELETE de pedido'
     });
 });
 
 router.get('/:id_produto', (req, res, next) => {
-    const id = req.params.id_produto
+    const id = req.params.id_produto;
 
-    if (id == 'especial'){
-        res.status(200).send({
-            mensagem: 'Detalhes de um produto especial',
-            id: id
-        });
-    } else {
-        res.status(200).send({
-            mensagem: 'Detalhes de um produtos',
-            id: id
-        });
-    }
+    res.status(200).send({
+        mensagem: 'Detalhes de um pedido especial',
+        id: id
+    });
 });
-
 
 module.exports = router;
