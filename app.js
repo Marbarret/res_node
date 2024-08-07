@@ -4,8 +4,8 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const { connectToDatabase, client } = require('./db');
 
-const rotaProdutos = require('./routes/produtos');
 const rotaPedido = require('./routes/pedidos');
+const rotaCourse = require('./routes/course');
 
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -36,8 +36,8 @@ app.use(async (req, res, next) => {
     }
 });
 
-app.use('/produtos', rotaProdutos);
 app.use('/pedidos', rotaPedido);
+app.use('/course', rotaCourse);
 
 app.use((req, res, next) => {
     const erro = new Error('Nenhuma rota encontrada');
