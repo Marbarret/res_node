@@ -1,13 +1,17 @@
 const express = require('express');
 const router = express.Router();
 
+function getCollectionDB(req) {
+    const db = req.dbClient.db('curso');
+    return db.collection('modulo');
+}
+
 router.get('/', async (req, res, next) => {
     try {
-        const db = req.dbClient.db('curso');
-        const collection = db.collection('modulo');
+        const collection = getCollectionDB(req);
         const cursos = await collection.find({}).toArray();
         if (cursos.length === 0) {
-            console.warn('Nenhum produto encontrado na coleção');
+            console.warn('Nenhum Curso encontrado na coleção');
         }
 
         res.status(200).json(cursos);
@@ -39,7 +43,6 @@ router.post('/', async (req, res, next) => {
 
 router.delete('/:id', async (req, res, next) => {
     const id = req.params.id;
-
     try {
         const db = req.dbClient.db('curso');
         const collection = db.collection('modulo');
@@ -56,8 +59,8 @@ router.delete('/:id', async (req, res, next) => {
     }
 });
 
-router.put('/:id_produto', async (req, res, next) => {
-    const id = req.params.id_produto;
+router.put('/:id_curso', async (req, res, next) => {
+    const id = req.params.id_curso;
     const atualizacao = req.body;
 
     try {
@@ -67,17 +70,17 @@ router.put('/:id_produto', async (req, res, next) => {
         const result = await collection.replaceOne({ _id: new ObjectId(id) }, atualizacao);
 
         if (result.matchedCount === 0) {
-            return res.status(404).json({ mensagem: 'Produto não encontrado' });
+            return res.status(404).json({ mensagem: 'Curso não encontrado' });
         }
 
         res.status(200).json(result);
     } catch (err) {
-        res.status(500).json({ mensagem: 'Erro ao atualizar produto', erro: err });
+        res.status(500).json({ mensagem: 'Erro ao atualizar Curso', erro: err });
     }
 });
 
-router.patch('/:id_produto', async (req, res, next) => {
-    const id = req.params.id_produto;
+router.patch('/:id_curso', async (req, res, next) => {
+    const id = req.params.id_curso;
     const atualizacao = req.body;
 
     try {
@@ -90,32 +93,32 @@ router.patch('/:id_produto', async (req, res, next) => {
         );
 
         if (result.matchedCount === 0) {
-            return res.status(404).json({ mensagem: 'Produto não encontrado' });
+            return res.status(404).json({ mensagem: 'Curso não encontrado' });
         }
 
         res.status(200).json(result);
     } catch (err) {
-        res.status(500).json({ mensagem: 'Erro ao atualizar produto', erro: err });
+        res.status(500).json({ mensagem: 'Erro ao atualizar Curso', erro: err });
     }
 });
 
 
-router.get('/:id_produto', async (req, res, next) => {
-    const id = req.params.id_produto;
+router.get('/:id_curso', async (req, res, next) => {
+    const id = req.params.id_curso;
 
     try {
-        const db = req.dbClient.db('sample_airbnb');
-        const collection = db.collection('listingsAndReviews');
+        const db = req.dbClient.db('curso');
+        const collection = db.collection('modulo');
 
-        const produto = await collection.findOne({ _id: new ObjectId(id) });
+        const curso = await collection.findOne({ _id: new ObjectId(id) });
 
-        if (!produto) {
-            return res.status(404).json({ mensagem: 'Produto não encontrado' });
+        if (!curso) {
+            return res.status(404).json({ mensagem: 'Curso não encontrado' });
         }
 
-        res.status(200).json(produto);
+        res.status(200).json(curso);
     } catch (err) {
-        res.status(500).json({ mensagem: 'Erro ao buscar produto', erro: err });
+        res.status(500).json({ mensagem: 'Erro ao buscar Curso', erro: err });
     }
 });
 
