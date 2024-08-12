@@ -37,8 +37,8 @@ router.post('/', async (req, res, next) => {
     }
 });
 
-router.delete('/:id_course', async (req, res, next) => {
-    const id = req.params.id_course;
+router.delete('/:id', async (req, res, next) => {
+    const id = req.params.id;
 
     try {
         const db = req.dbClient.db('curso');
