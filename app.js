@@ -4,7 +4,6 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const { connectToDatabase, client } = require('./db');
 
-const rotaPedido = require('./routes/pedidos');
 const rotaCourse = require('./routes/course');
 
 app.use(morgan('dev'));
@@ -36,7 +35,6 @@ app.use(async (req, res, next) => {
     }
 });
 
-app.use('/pedidos', rotaPedido);
 app.use('/course', rotaCourse);
 
 app.use((req, res, next) => {
