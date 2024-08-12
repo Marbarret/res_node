@@ -23,9 +23,7 @@ router.get('/', async (req, res, next) => {
 
 router.post('/', async (req, res, next) => {
     try {
-        const db = req.dbClient.db('curso');
-        const collection = db.collection('modulo');
-
+        const collection = getCollectionDB(req);
         const novoCurso = {
             nome: req.body.nome,
             descricao: req.body.descricao,
@@ -44,9 +42,7 @@ router.post('/', async (req, res, next) => {
 router.delete('/:id', async (req, res, next) => {
     const id = req.params.id;
     try {
-        const db = req.dbClient.db('curso');
-        const collection = db.collection('modulo');
-
+        const collection = getCollectionDB(req);
         const result = await collection.delete({ _id: new ObjectId(id) });
 
         if (result.deletedCount === 0) {
@@ -64,9 +60,7 @@ router.put('/:id_curso', async (req, res, next) => {
     const atualizacao = req.body;
 
     try {
-        const db = req.dbClient.db('curso');
-        const collection = db.collection('modulo');
-
+        const collection = getCollectionDB(req);
         const result = await collection.replaceOne({ _id: new ObjectId(id) }, atualizacao);
 
         if (result.matchedCount === 0) {
@@ -84,9 +78,7 @@ router.patch('/:id_curso', async (req, res, next) => {
     const atualizacao = req.body;
 
     try {
-        const db = req.dbClient.db('curso');
-        const collection = db.collection('modulo');
-
+        const collection = getCollectionDB(req);
         const result = await collection.updateOne(
             { _id: new ObjectId(id) },
             { $set: atualizacao }
@@ -107,9 +99,7 @@ router.get('/:id_curso', async (req, res, next) => {
     const id = req.params.id_curso;
 
     try {
-        const db = req.dbClient.db('curso');
-        const collection = db.collection('modulo');
-
+        const collection = getCollectionDB(req);
         const curso = await collection.findOne({ _id: new ObjectId(id) });
 
         if (!curso) {
