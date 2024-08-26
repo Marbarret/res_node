@@ -2,9 +2,9 @@ const express = require('express');
 const app = express();
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
-const { connectToDatabase, client } = require('./db');
+const { connectToDatabase, client } = require('./src/data/db');
 
-const rotaCourse = require('./routes/course');
+const rotaCourse = require('./src/routes/course');
 
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: false }));

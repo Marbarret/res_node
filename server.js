@@ -1,6 +1,6 @@
 const http = require('http');
 const app = require('./app');
-const { connectToDatabase } = require('./db');
+const { connectToDatabase } = require('./src/data/db');
 const port = process.env.PORT || 3000;
 
 async function startServer() {

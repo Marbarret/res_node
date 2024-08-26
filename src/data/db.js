@@ -9,6 +9,11 @@ const client = new MongoClient(uri, {
   }
 });
 
+const getCollectionDB = (dbClient, collectionName) => {
+  const db = dbClient.db('curso');
+  return db.collection(collectionName);
+};
+
 async function connectToDatabase() {
   if (!client.topology || !client.topology.isConnected()) {
     await client.connect();
@@ -18,6 +23,7 @@ async function connectToDatabase() {
 }
 
 module.exports = {
+  getCollectionDB,
   connectToDatabase,
   client
 };
