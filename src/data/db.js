@@ -9,21 +9,28 @@ const client = new MongoClient(uri, {
   }
 });
 
-const getCollectionDB = (dbClient, dbName, collectionName) => {
-  const db = dbClient.db(dbName);
+const getCollectionDB = (dbClient, collectionName) => {
+  const db = dbClient.db('curso');
   return db.collection(collectionName);
 };
 
-async function connectToDatabase() {
-  if (!client.topology || !client.topology.isConnected()) {
-    await client.connect();
-    console.log("Conectado ao MongoDB com sucesso!");
+async function connectToDatabase(dbName) {
+  try {
+    if (!client.topology || !client.topology.isConnected()) {
+      await client.connect();
+      console.log(`Conectado ao MongoDB no banco de dados ${dbName}`);
+    }
+    return client.db(dbName);
+  } catch (err) {
+    console.error('Erro ao conectar ao MongoDB:', err);
+    throw err;
   }
-  return client;
 }
 
+
+
 module.exports = {
-  getCollectionDB,
   connectToDatabase,
+  getCollectionDB,
   client
 };

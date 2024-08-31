@@ -27,7 +27,6 @@ app.use((req, res, next) => {
 
 app.use(async (req, res, next) => {
     try {
-        await connectToDatabase();
         req.dbClient = client;
         next();
     } catch (err) {

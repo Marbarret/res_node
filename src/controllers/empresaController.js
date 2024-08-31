@@ -1,8 +1,8 @@
-const userService = require('../services/userService');
+const empresaService = require('../services/empresaService');
 
-const getAllUsers = async (req, res) => {
+const getAllEmpresas = async (req, res) => {
     try {
-        const usuários = await userService.getAllUsers(req.dbClient);
+        const usuários = await empresaService.getAllEmpresas(req.dbClient);
         if (usuários.length === 0) {
             console.warn('Nenhum usuário encontrado na base');
         }
@@ -13,10 +13,10 @@ const getAllUsers = async (req, res) => {
     }
 };
 
-const getUserById = async (req, res) => {
+const getEmpresaById = async (req, res) => {
     const id = req.params.id_usuário;
     try {
-        const usuário = await userService.getUserById(req.dbClient, id);
+        const usuário = await empresaService.getEmpresaById(req.dbClient, id);
         if (!usuário) {
             return res.status(404).json({ mensagem: 'Usuário não encontrado' });
         }
@@ -26,30 +26,29 @@ const getUserById = async (req, res) => {
     }
 };
 
-const createUser = async (req, res) => {
+const createEmpresa = async (req, res) => {
     try {
-        const newUser = {
-            name: req.body.name,
-            phone: req.body.phone,
-            address: req.body.address,
-            photo: req.body.photo,
-            document: req.body.document,
-            dependents: req.body.dependents || []
+        const novousuário = {
+            nome: req.body.nome,
+            descricao: req.body.descricao,
+            instrutor: req.body.instrutor,
+            duracao: req.body.duracao,
+            valor: req.body.valor
         };
 
-        const result = await userService.createUser(req.dbClient, newUser);
+        const result = await empresaService.createEmpresa(req.dbClient, novousuário);
         res.status(201).json(result);
     } catch (err) {
         res.status(500).json({ mensagem: 'Erro ao criar usuário', erro: err });
     }
 };
 
-const updateUser = async (req, res) => {
+const updateEmpresa = async (req, res) => {
     const id = req.params.id_usuário;
     const atualizacao = req.body;
 
     try {
-        const result = await userService.updateUser(req.dbClient, id, atualizacao);
+        const result = await empresaService.updateEmpresa(req.dbClient, id, atualizacao);
         if (result.matchedCount === 0) {
             return res.status(404).json({ mensagem: 'usuário não encontrado' });
         }
@@ -59,12 +58,12 @@ const updateUser = async (req, res) => {
     }
 };
 
-const patchUser = async (req, res) => {
+const patchEmpresa = async (req, res) => {
     const id = req.params.id_usuário;
     const atualizacaoParcial = req.body;
 
     try {
-        const result = await userService.patchUser(req.dbClient, id, atualizacaoParcial);
+        const result = await empresaService.patchEmpresa(req.dbClient, id, atualizacaoParcial);
         if (result.matchedCount === 0) {
             return res.status(404).json({ mensagem: 'usuário não encontrado' });
         }
@@ -74,10 +73,10 @@ const patchUser = async (req, res) => {
     }
 };
 
-const deleteUser = async (req, res) => {
+const deleteEmpresa = async (req, res) => {
     const id = req.params.id_usuário;
     try {
-        const result = await userService.deleteUser(req.dbClient, id);
+        const result = await empresaService.deleteEmpresa(req.dbClient, id);
         if (result.deletedCount === 0) {
             return res.status(404).json({ mensagem: 'usuário não encontrado' });
         }
@@ -88,10 +87,10 @@ const deleteUser = async (req, res) => {
 };
 
 module.exports = {
-    getAllUsers,
-    getUserById,
-    createUser,
-    updateUser,
-    patchUser,
-    deleteUser
+    getAllEmpresas,
+    getEmpresaById,
+    createEmpresa,
+    updateEmpresa,
+    patchEmpresa,
+    deleteEmpresa
 };
