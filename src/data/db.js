@@ -9,8 +9,8 @@ const client = new MongoClient(uri, {
   }
 });
 
-const getCollectionDB = (dbClient, collectionName) => {
-  const db = dbClient.db('curso');
+const getCollectionDB = (dbClient, dbName, collectionName) => {
+  const db = dbClient.db(dbName);
   return db.collection(collectionName);
 };
 
