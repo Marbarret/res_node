@@ -2,8 +2,10 @@ const { ObjectId } = require('mongodb');
 const { getCollectionDB } = require('../data/db');
 
 const getAllCourses = async (db) => {
-    const collection = getCollectionDB(db, 'curso', 'modulo'); // Nome do DB e coleção corrigidos
+    const collection = getCollectionDB(db, 'curso', 'modulo');
+    console.log('Conectado à coleção modulo no banco curso');
     const cursos = await collection.find({}).toArray();
+    console.log('Cursos encontrados:', cursos);
     return cursos;
 };
 
