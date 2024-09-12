@@ -31,6 +31,7 @@ const patchCourse = async (db, id, atualizacaoParcial) => {
 
 const deleteCourse = async (db, id) => {
     const collection = getCollectionDB(db, 'curso', 'modulo');
+    
     return await collection.deleteOne({ _id: new ObjectId(id) });
 };
 
