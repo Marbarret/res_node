@@ -3,9 +3,7 @@ const { getCollectionDB } = require('../data/db');
 
 const getAllCourses = async (db) => {
     const collection = getCollectionDB(db, 'curso', 'modulo');
-    console.log('Conectado à coleção modulo no banco curso');
     const cursos = await collection.find({}).toArray();
-    console.log('Cursos encontrados:', cursos);
     return cursos;
 };
 
@@ -31,7 +29,6 @@ const patchCourse = async (db, id, atualizacaoParcial) => {
 
 const deleteCourse = async (db, id) => {
     const collection = getCollectionDB(db, 'curso', 'modulo');
-    
     return await collection.deleteOne({ _id: new ObjectId(id) });
 };
 

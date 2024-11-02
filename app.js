@@ -4,7 +4,8 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const { connectToDatabase, client } = require('./src/data/db');
 
-const rotaCourse = require('./src/routes/course');
+const courseRoute = require('./src/routes/course');
+const userRoute = require('./src/routes/userRoute');
 
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -34,7 +35,8 @@ app.use(async (req, res, next) => {
     }
 });
 
-app.use('/course', rotaCourse);
+app.use('/course', courseRoute);
+app.use('/users', userRoute);
 
 app.use((req, res, next) => {
     const erro = new Error('Nenhuma rota encontrada');
@@ -42,13 +44,26 @@ app.use((req, res, next) => {
     next(erro);
 });
 
-app.use((error, req, res, next) => {
-    res.status(error.status || 500);
-    return res.send({
-        erro: {
-            mensagem: error.message
+app.use(async (req, res, next) => {
+    try {
+        if (!client.topology || !client.topology.isConnected()) {
+            await client.connect();
         }
-    });
+
+        if (req.path.startsWith('/course')) {
+            req.dbClient = client.db('curso');
+            console.log('Conectado ao banco de dados curso');
+        } else if (req.path.startsWith('/user')) {
+            req.dbClient = client.db('users');
+            console.log('Conectado ao banco de dados users');
+        }
+
+        next();
+    } catch (err) {
+        console.error('Erro ao conectar ao MongoDB:', err);
+        next(err);
+    }
 });
+
 
 module.exports = app;
