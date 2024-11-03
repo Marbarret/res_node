@@ -1,5 +1,6 @@
 const { ObjectId } = require('mongodb');
 const { getCollectionDB } = require('../data/db');
+const bcrypt = require('bcrypt');
 
 const getAllUsers = async (dbClient) => {
     const collection = getCollectionDB(dbClient, 'users', 'usuario');
@@ -12,9 +13,11 @@ const getUserById = async (dbClient, id) => {
     return await collection.findOne({ _id: new ObjectId(id) });
 };
 
-const createNewUser = async (dbClient, novoUsuario) => {
+const createNewUser = async (dbClient, newUser) => {
     const collection = getCollectionDB(dbClient, 'users', 'usuario');
-    return await collection.insertOne(novoUsuario);
+    const saltRounds = 10;
+    newUser.password = await bcrypt.hash(newUser.password, saltRounds)
+    return await collection.insertOne(newUser);
 };
 
 const updateUser = async (dbClient, id, atualizacao) => {

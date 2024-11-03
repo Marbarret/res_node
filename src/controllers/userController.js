@@ -1,4 +1,6 @@
 const userService = require('../services/userService');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const getAllUsers = async (req, res) => {
     try {
@@ -28,12 +30,15 @@ const getUserById = async (req, res) => {
 
 const createUser = async (req, res) => {
     try {
+        const hashedPassword = await bcrypt.hash(req.body.password, 10);
         const newUser = {
             name: req.body.name,
             phone: req.body.phone,
+            email: req.body.email,
             address: req.body.address,
             photo: req.body.photo,
             document: req.body.document,
+            password: hashedPassword,
             dependents: req.body.dependents || []
         };
 

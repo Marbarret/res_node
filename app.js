@@ -6,6 +6,7 @@ const { connectToDatabase, client } = require('./src/data/db');
 
 const courseRoute = require('./src/routes/course');
 const userRoute = require('./src/routes/userRoute');
+const authRoute = require('./src/routes/authRoute');
 
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -37,6 +38,7 @@ app.use(async (req, res, next) => {
 
 app.use('/course', courseRoute);
 app.use('/users', userRoute);
+app.use('/login', authRoute);
 
 app.use((req, res, next) => {
     const erro = new Error('Nenhuma rota encontrada');
@@ -49,6 +51,7 @@ app.use(async (req, res, next) => {
         if (!client.topology || !client.topology.isConnected()) {
             await client.connect();
         }
+        req.dbClient = client;
 
         if (req.path.startsWith('/course')) {
             req.dbClient = client.db('curso');
@@ -64,6 +67,5 @@ app.use(async (req, res, next) => {
         next(err);
     }
 });
-
 
 module.exports = app;
