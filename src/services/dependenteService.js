@@ -1,21 +1,45 @@
-const { getCollectionDB } = require('../data/db');
 const { ObjectId } = require('mongodb');
+const { getCollectionDB } = require('../data/db');
 
-const addDependent = async (dbClient, userId, dependent) => {
-    const collection = getCollectionDB(dbClient, 'users', 'usuario');
+const getDependentsByDocument = async (dbClient, document) => {
+    try {
+        const db = dbClient.db('users');
+        const user = await db.collection('usuario').findOne({ document });
 
-    const result = await collection.updateOne(
-        { _id: new ObjectId(userId) },
-        { $push: { dependents: dependent } }
-    );
+        if (!user || !user.dependents) {
+            return [];
+        }
 
-    if (result.matchedCount === 0) {
-        throw new Error('Usuário não encontrado');
+        return user.dependents;
+    } catch (error) {
+        throw new Error('Erro ao buscar dependentes: ' + error.message);
     }
+};
 
-    return result;
+const addDependent = async (dbClient, document, newDependent) => {
+    return dbClient.collection('users').updateOne(
+        { document },
+        { $push: { dependents: newDependent } }
+    );
+};
+
+const updateDependent = async (dbClient, document, dependentId, updatedData) => {
+    return dbClient.collection('users').updateOne(
+        { document, "dependents._id": dependentId },
+        { $set: { "dependents.$": updatedData } }
+    );
+};
+
+const deleteDependent = async (dbClient, document, dependentId) => {
+    return dbClient.collection('users').updateOne(
+        { document },
+        { $pull: { dependents: { _id: dependentId } } }
+    );
 };
 
 module.exports = {
-    addDependent
+    getDependentsByDocument,
+    addDependent,
+    updateDependent,
+    deleteDependent
 };

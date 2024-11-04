@@ -17,7 +17,7 @@ const login = async (req, res, next) => {
         console.log('Senha válida:', isPasswordValid); 
         if (!isPasswordValid) return res.status(401).json({ mensagem: 'Senha incorreta' });
 
-        const token = jwt.sign({ userId: user._id }, 'seuSegredoJWT', { expiresIn: '1h' });
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
         res.status(200).json({ token });
     } catch (error) {
         res.status(500).json({ mensagem: 'Erro ao fazer login', erro: error });

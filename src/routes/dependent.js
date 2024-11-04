@@ -1,7 +1,11 @@
 const express = require('express');
-const router = express.Router();
 const dependentController = require('../controllers/dependentController');
+const router = express.Router();
 
-router.post('/:userId', dependentController.createDependents);
+router.get('/', dependentController.getDependentsByDocument);
+router.post('/', dependentController.addDependent);
+router.put('/:dependentId', dependentController.updateDependent);
+router.delete('/:dependentId', dependentController.deleteDependent);
+// router.get('/:document/dependents', dependentController.listDependents);
 
 module.exports = router;
