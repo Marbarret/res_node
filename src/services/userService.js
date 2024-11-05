@@ -8,9 +8,14 @@ const getAllUsers = async (dbClient) => {
     return users;
 };
 
-const getUserById = async (dbClient, id) => {
-    const collection = getCollectionDB(dbClient, 'users', 'usuario');
-    return await collection.findOne({ _id: new ObjectId(id) });
+const getUserByDocument = async (dbClient, document) => {
+    try {
+        const db = dbClient.db('users');
+        const usuario = await db.collection('usuario').findOne({ document: document });
+        return usuario;
+    } catch (error) {
+        throw new Error('Erro ao buscar usuário: ' + error.message);
+    }
 };
 
 const createNewUser = async (dbClient, newUser) => {
@@ -37,7 +42,7 @@ const deleteUser = async (dbClient, id) => {
 
 module.exports = {
     getAllUsers,
-    getUserById,
+    getUserByDocument,
     createNewUser,
     updateUser,
     patchUser,

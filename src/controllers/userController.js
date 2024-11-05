@@ -15,10 +15,10 @@ const getAllUsers = async (req, res) => {
     }
 };
 
-const getUserById = async (req, res) => {
-    const id = req.params.id_usuario;
+const getUserByDocument = async (req, res) => {
+    const document = req.params.document;
     try {
-        const usuario = await userService.getUserById(req.dbClient, id);
+        const usuario = await userService.getUserByDocument(req.dbClient, document);
         if (!usuario) {
             return res.status(404).json({ mensagem: 'Usuário não encontrado' });
         }
@@ -94,7 +94,7 @@ const deleteUser = async (req, res) => {
 
 module.exports = {
     getAllUsers,
-    getUserById,
+    getUserByDocument,
     createUser,
     updateUser,
     patchUser,
