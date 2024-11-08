@@ -6,6 +6,5 @@ router.get('/', dependentController.getDependentsByDocument);
 router.post('/', dependentController.addDependent);
 router.put('/:dependentId', dependentController.updateDependent);
 router.delete('/:dependentId', dependentController.deleteDependent);
-// router.get('/:document/dependents', dependentController.listDependents);
 
 module.exports = router;
