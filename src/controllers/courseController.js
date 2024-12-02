@@ -1,4 +1,5 @@
 const courseService = require('../services/courseService');
+const Course = require('../models/courseModel');
 
 const getAllCourses = async (req, res) => {
     try {
@@ -28,15 +29,10 @@ const getCourseById = async (req, res) => {
 
 const createCourse = async (req, res) => {
     try {
-        const novoCurso = {
-            nome: req.body.nome,
-            descricao: req.body.descricao,
-            instrutor: req.body.instrutor,
-            duracao: req.body.duracao,
-            valor: req.body.valor
-        };
-
-        const result = await courseService.createCourse(req.dbClient, novoCurso);
+        const novoCurso = new Course(req.body);
+        novoCurso.validate();
+        const cursoPlano = novoCurso.toObject();
+        const result = await courseService.createCourse(req.dbClient, cursoPlano);
         res.status(201).json(result);
     } catch (err) {
         res.status(500).json({ mensagem: 'Erro ao criar curso', erro: err });

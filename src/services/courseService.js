@@ -1,6 +1,8 @@
 const { ObjectId } = require('mongodb');
 const { getCollectionDB } = require('../data/db');
 
+const Course = require('../models/courseModel');
+
 const getAllCourses = async (db) => {
     const collection = getCollectionDB(db, 'curso', 'modulo');
     const cursos = await collection.find({}).toArray();
@@ -14,7 +16,8 @@ const getCourseById = async (db, id) => {
 
 const createCourse = async (db, novoCurso) => {
     const collection = getCollectionDB(db, 'curso', 'modulo');
-    return await collection.insertOne(novoCurso);
+    const result = await collection.insertOne(novoCurso);
+    return result.ops ? result.ops[0] : novoCurso;
 };
 
 const updateCourse = async (db, id, atualizacao) => {
