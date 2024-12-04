@@ -1,6 +1,7 @@
 const userService = require('../services/userService');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const User = require('../models/userModel');
 
 const getAllUsers = async (req, res) => {
     try {
@@ -30,20 +31,10 @@ const getUserByDocument = async (req, res) => {
 
 const createUser = async (req, res) => {
     try {
-        const password = req.body.password
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = {
-            name: req.body.name,
-            phone: req.body.phone,
-            email: req.body.email,
-            address: req.body.address,
-            photo: req.body.photo,
-            document: req.body.document,
-            password: hashedPassword,
-            dependents: req.body.dependents || []
-        };
-
-        const result = await userService.createNewUser(req.dbClient, newUser);
+        const newUser = new User(req.body);
+        newUser.validate();
+        const usePlan = newUser.toObject();
+        const result = await userService.createNewUser(req.dbClient, usePlan);
         res.status(201).json(result);
     } catch (err) {
         res.status(500).json({ mensagem: 'Erro ao criar usuário', erro: err });

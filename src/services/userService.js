@@ -20,9 +20,10 @@ const getUserByDocument = async (dbClient, document) => {
 
 const createNewUser = async (dbClient, newUser) => {
     const collection = getCollectionDB(dbClient, 'users', 'usuario');
-    const saltRounds = 10;
-    newUser.password = await bcrypt.hash(newUser.password, saltRounds)
-    return await collection.insertOne(newUser);
+    // const saltRounds = 10;
+    // newUser.password = await bcrypt.hash(newUser.password, saltRounds)
+    const result = await collection.insertOne(newUser);
+    return result.ops ? result.ops[0] : newUser;
 };
 
 const updateUser = async (dbClient, id, atualizacao) => {
