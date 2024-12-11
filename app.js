@@ -3,12 +3,13 @@ const app = express();
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const { connectToDatabase, client } = require('./src/data/db');
-const dotenv = require('dotenv').config();
 
 const courseRoute = require('./src/routes/course');
 const userRoute = require('./src/routes/userRoute');
 const authRoute = require('./src/routes/authRoute');
-const dependentRoute = require('./src/routes/dependent')
+const dependentRoute = require('./src/routes/dependent');
+const authRoutes = require('./src/routes/authRoute');
+const protectedRoutes = require('./src/routes/protectedRoute');
 
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -42,6 +43,8 @@ app.use('/course', courseRoute);
 app.use('/users', userRoute);
 app.use('/login', authRoute);
 app.use('/users/:document/dependents', dependentRoute);
+app.use('/auth', authRoutes);
+app.use('/api', protectedRoutes);
 
 
 app.use((req, res, next) => {

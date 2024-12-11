@@ -50,9 +50,10 @@ const createUser = async (req, res) => {
         const hashedPassword = await bcrypt.hash(responsavel.senha, 10);
 
         responsavel.senha = hashedPassword;
+        delete responsavel.confirmacao_senha;
 
         const user = await userService.createNewUser(req.dbClient, responsavel);
-
+        console.log('Usuário criado:', user);
         return res.status(201).json(user);
     } catch (error) {
         console.error('Erro ao criar usuário:', error.message);

@@ -34,7 +34,7 @@ const createNewUser = async (dbClient, newUser) => {
         const result = await collection.insertOne(newUser);
         return result.ops ? result.ops[0] : newUser;
     } catch (err) {
-        if (err.code === 11000) { // Código de erro para duplicidade no MongoDB
+        if (err.code === 11000) {
             throw new Error('CPF já cadastrado');
         }
         throw err;
@@ -56,9 +56,16 @@ const deleteUser = async (dbClient, id) => {
     return await collection.deleteOne({ _id: new ObjectId(id) });
 };
 
+const getUserByEmail = async (dbClient, email) => {
+    const collection = getCollectionDB(dbClient, 'users', 'usuario');
+    const user = await collection.findOne({ email: email.trim() });
+    return user;
+};
+
 module.exports = {
     getAllUsers,
     getUserByDocument,
+    getUserByEmail,
     createNewUser,
     updateUser,
     patchUser,

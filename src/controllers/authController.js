@@ -1,27 +1,43 @@
-const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const authService = require('../services/authService');
+const userService = require('../services/userService');
+const jwt = require('jsonwebtoken');
 
-const login = async (req, res, next) => {
-    const { email, password } = req.body;
-
+const login = async (req, res) => {
     try {
-        const user = await authService.getUserByEmail(req.dbClient, email);
-        console.log('Usuário encontrado:', user); 
-        if (!user) return res.status(404).json({ mensagem: 'Usuário não encontrado' });
+        const { email, senha } = req.body;
 
-        console.log('Senha fornecida:', password);
-        console.log('Hash armazenado:', user.password); 
+        if (!email || !senha) {
+            return res.status(400).json({ mensagem: 'Email e senha são obrigatórios.' });
+        }
 
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        console.log('Senha válida:', isPasswordValid); 
-        if (!isPasswordValid) return res.status(401).json({ mensagem: 'Senha incorreta' });
+        const user = await userService.getUserByEmail(req.dbClient, email);
+        console.log(user);
 
-        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-        res.status(200).json({ token });
+        if (!user) {
+            console.error('Usuário não encontrado para o email:', email);
+            return res.status(404).json({ mensagem: 'Usuário não encontrado.' });
+        }
+
+        const isPasswordValid = await bcrypt.compare(senha, user.senha);
+        console.log('Senha válida:', isPasswordValid);
+
+        if (!isPasswordValid) {
+            return res.status(401).json({ mensagem: 'Credenciais inválidas.' });
+        }
+
+        console.log(user.senha);
+
+    
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+        return res.status(200).json({ token });
     } catch (error) {
-        res.status(500).json({ mensagem: 'Erro ao fazer login', erro: error });
+        console.error('Erro ao realizar login:', error.message);
+        return res.status(500).json({ mensagem: 'Erro ao realizar login: ' + error.message });
     }
 };
 
-module.exports = { login };
+
+module.exports = {
+    login
+};
