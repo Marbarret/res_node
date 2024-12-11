@@ -14,6 +14,12 @@ const getCollectionDB = (dbClient, dbName, collectionName) => {
   return db.collection(collectionName);
 };
 
+const ensureUniqueIndex = async (dbClient) => {
+  const collection = getCollectionDB(dbClient, 'users', 'usuario');
+  await collection.createIndex({ 'responsavel.cpf': 1 }, { unique: true });
+  console.log('Índice único para CPF criado com sucesso.');
+};
+
 async function connectToDatabase(dbName) {
   try {
     if (!client.topology || !client.topology.isConnected()) {
@@ -30,5 +36,6 @@ async function connectToDatabase(dbName) {
 module.exports = {
   connectToDatabase,
   getCollectionDB,
+  ensureUniqueIndex,
   client
 };

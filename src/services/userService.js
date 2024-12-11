@@ -8,6 +8,16 @@ const getAllUsers = async (dbClient) => {
     return users;
 };
 
+const checkCPFExists = async (dbClient, cpf) => {
+    try {
+        const collection = getCollectionDB(dbClient, 'users', 'usuario');
+        const user = await collection.findOne({ cpf });
+        return !!user;
+    } catch (error) {
+        throw new Error('Erro ao verificar CPF: ' + error.message);
+    }
+};
+
 const getUserByDocument = async (dbClient, document) => {
     try {
         const db = dbClient.db('users');
@@ -20,10 +30,15 @@ const getUserByDocument = async (dbClient, document) => {
 
 const createNewUser = async (dbClient, newUser) => {
     const collection = getCollectionDB(dbClient, 'users', 'usuario');
-    // const saltRounds = 10;
-    // newUser.password = await bcrypt.hash(newUser.password, saltRounds)
-    const result = await collection.insertOne(newUser);
-    return result.ops ? result.ops[0] : newUser;
+    try {
+        const result = await collection.insertOne(newUser);
+        return result.ops ? result.ops[0] : newUser;
+    } catch (err) {
+        if (err.code === 11000) { // Código de erro para duplicidade no MongoDB
+            throw new Error('CPF já cadastrado');
+        }
+        throw err;
+    }
 };
 
 const updateUser = async (dbClient, id, atualizacao) => {
@@ -47,5 +62,6 @@ module.exports = {
     createNewUser,
     updateUser,
     patchUser,
-    deleteUser
+    deleteUser,
+    checkCPFExists
 };
