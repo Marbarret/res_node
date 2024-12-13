@@ -61,13 +61,10 @@ app.use(async (req, res, next) => {
 
         if (req.path.startsWith('/course')) {
             req.dbClient = client.db('curso'); // Acesso ao DB 'curso' para rotas '/course'
-            console.log('Conectado ao banco de dados curso');
         } else if (req.path.startsWith('/users')) {
-            req.dbClient = client.db('users'); // Acesso ao DB 'users' para rotas '/users'
-            console.log('Conectado ao banco de dados users');
-        } else if (req.path.match(/^\/[0-9]+\/dependents/)) { // Verifica se a rota é '/:document/dependents'
             req.dbClient = client.db('users');
-            console.log('Conectado ao banco de dados users para dependentes');
+        } else if (req.path.match(/^\/[0-9]+\/dependents/)) {
+            req.dbClient = client.db('users');
         } else {
             req.dbClient = client; // Conexão padrão para outras rotas
         }

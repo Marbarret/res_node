@@ -1,6 +1,7 @@
 const { ObjectId } = require('mongodb');
 const { getCollectionDB } = require('../data/db');
 const bcrypt = require('bcrypt');
+const collectionDb = getCollectionDB(dbClient, 'users', 'usuario');
 
 const getAllUsers = async (dbClient) => {
     const collection = getCollectionDB(dbClient, 'users', 'usuario');
@@ -21,9 +22,13 @@ const checkCPFExists = async (dbClient, cpf) => {
 const getUserByDocument = async (dbClient, document) => {
     try {
         const db = dbClient.db('users');
-        const usuario = await db.collection('usuario').findOne({ document: document });
+        const usuario = await db.collection('usuario').findOne({ 'responsavel.cpf': document });
+        if (!usuario) {
+            throw new Error('Usuário não encontrado.');
+        }
         return usuario;
     } catch (error) {
+        console.error('Erro ao buscar usuário:', error.message);
         throw new Error('Erro ao buscar usuário: ' + error.message);
     }
 };
@@ -41,10 +46,20 @@ const createNewUser = async (dbClient, newUser) => {
     }
 };
 
-const updateUser = async (dbClient, id, atualizacao) => {
+const updateUser = async (dbClient, document, updates) => {
     const collection = getCollectionDB(dbClient, 'users', 'usuario');
-    return await collection.replaceOne({ _id: new ObjectId(id) }, atualizacao);
+    // Atualiza o usuário encontrado
+    const result = await collection.updateOne(
+        { 'responsavel.cpf': document },
+        { $set: updates },
+        { upsert: false } // Garante que não cria um novo documento
+    );
+    if (result.matchedCount === 0) {
+        throw new Error('Usuário não encontrado.');
+    };
+    return result;
 };
+
 
 const patchUser = async (dbClient, id, atualizacaoParcial) => {
     const collection = getCollectionDB(dbClient, 'users', 'usuario');

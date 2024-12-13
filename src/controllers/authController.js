@@ -11,22 +11,15 @@ const login = async (req, res) => {
         }
 
         const user = await userService.getUserByEmail(req.dbClient, email);
-        console.log(user);
-
         if (!user) {
             console.error('Usuário não encontrado para o email:', email);
             return res.status(404).json({ mensagem: 'Usuário não encontrado.' });
         }
 
         const isPasswordValid = await bcrypt.compare(senha, user.senha);
-        console.log('Senha válida:', isPasswordValid);
-
         if (!isPasswordValid) {
             return res.status(401).json({ mensagem: 'Credenciais inválidas.' });
         }
-
-        console.log(user.senha);
-
     
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 

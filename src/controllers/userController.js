@@ -53,7 +53,6 @@ const createUser = async (req, res) => {
         delete responsavel.confirmacao_senha;
 
         const user = await userService.createNewUser(req.dbClient, responsavel);
-        console.log('Usuário criado:', user);
         return res.status(201).json(user);
     } catch (error) {
         console.error('Erro ao criar usuário:', error.message);
@@ -61,23 +60,47 @@ const createUser = async (req, res) => {
     }
 };
 
-
-
 const updateUser = async (req, res) => {
-    const id = req.params.id_usuario;
-    const atualizacao = req.body;
-
     try {
-        const result = await userService.updateUser(req.dbClient, id, atualizacao);
-        if (result.matchedCount === 0) {
-            return res.status(404).json({ mensagem: 'Usuário não encontrado' });
+        const userId = req.params.cpf;
+        const updates = { ...req.body };
+
+        const currentUser = await userService.getUserByDocument(req.dbClient, userId);
+
+        if (!currentUser) {
+            return res.status(404).json({ mensagem: 'Usuário não encontrado.' });
         }
-        res.status(200).json(result);
-    } catch (err) {
-        console.error('Erro ao atualizar usuário:', err);
-        res.status(500).json({ mensagem: 'Erro ao atualizar usuário', erro: err.message });
+
+        const allowedFields = ['nome_completo', 'email', 'telefone', 'endereco'];
+        const fieldsToUpdate = {};
+
+        allowedFields.forEach((field) => {
+            if (updates[field] && updates[field] !== currentUser.responsavel[field]) {
+                fieldsToUpdate[field] = updates[field];
+            }
+        });
+
+        if (fieldsToUpdate.senha) {
+            fieldsToUpdate.senha = await bcrypt.hash(fieldsToUpdate.senha, 10);
+        }
+
+        if (Object.keys(fieldsToUpdate).length === 0) {
+            return res.status(400).json({ mensagem: 'Nenhuma alteração válida foi enviada.' });
+        }
+
+        const result = await userService.updateUser(req.dbClient, userId, fieldsToUpdate);
+
+        if (result.modifiedCount > 0) {
+            return res.status(200).json({ mensagem: 'Usuário atualizado com sucesso.' });
+        } else {
+            return res.status(200).json({ mensagem: 'Nenhuma modificação foi realizada.' });
+        }
+    } catch (error) {
+        console.error('Erro ao atualizar usuário:', error.message);
+        return res.status(500).json({ mensagem: 'Erro ao atualizar usuário.' });
     }
 };
+
 
 const patchUser = async (req, res) => {
     const id = req.params.id_usuario;
