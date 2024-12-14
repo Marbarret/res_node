@@ -1,7 +1,7 @@
-const express = require('express');
+import express from "express"
 const router = express.Router();
-const userController = require('../controllers/userController');
-const { authenticateToken } = require('../middlewares/authMiddleware');
+const userController = require('../controller/userController');
+const { authenticateToken } = require('../../middlewares/authMiddleware');
 
 router.get('/', userController.getAllUsers);
 router.get('/:document', userController.getUserByDocument);

@@ -1,4 +1,4 @@
-const empresaService = require('../services/empresaService');
+const empresaService = require('../../services/empresaService');
 
 const getAllEmpresas = async (req, res) => {
     try {

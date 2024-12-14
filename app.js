@@ -1,15 +1,15 @@
-const express = require('express');
+import express from "express"
 const app = express();
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const { connectToDatabase, client } = require('./src/data/db');
 
 const courseRoute = require('./src/routes/course');
-const userRoute = require('./src/routes/userRoute');
-const authRoute = require('./src/routes/authRoute');
-const dependentRoute = require('./src/routes/dependent');
-const authRoutes = require('./src/routes/authRoute');
-const protectedRoutes = require('./src/routes/protectedRoute');
+const userRoute = require('./src/users/route/userRoute');
+const authRoute = require('./src/authetication/route/authRoute');
+const dependentRoute = require('./src/dependent/route/dependent');
+const authRoutes = require('./src/authetication/route/authRoute');
+const protectedRoutes = require('./src/authetication/route/protectedRoute');
 
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: false }));

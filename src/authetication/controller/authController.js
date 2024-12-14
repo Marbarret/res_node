@@ -1,12 +1,12 @@
 const bcrypt = require('bcrypt');
-const userService = require('../services/userService');
+const userService = require('../../users/service/userService');
 const jwt = require('jsonwebtoken');
 
 const login = async (req, res) => {
     try {
-        const { email, senha } = req.body;
+        const { email, password } = req.body;
 
-        if (!email || !senha) {
+        if (!email || !password) {
             return res.status(400).json({ mensagem: 'Email e senha são obrigatórios.' });
         }
 
@@ -16,7 +16,7 @@ const login = async (req, res) => {
             return res.status(404).json({ mensagem: 'Usuário não encontrado.' });
         }
 
-        const isPasswordValid = await bcrypt.compare(senha, user.senha);
+        const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
             return res.status(401).json({ mensagem: 'Credenciais inválidas.' });
         }

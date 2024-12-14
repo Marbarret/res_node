@@ -1,4 +1,4 @@
-const dependenteService = require('../services/dependenteService');
+const dependenteService = require('../service/dependenteService');
 
 const listDependents = async (req, res) => {
     const { document } = req.params;

@@ -1,5 +1,5 @@
 const { ObjectId } = require('mongodb');
-const { getCollectionDB } = require('../data/db');
+const { getCollectionDB } = require('../../data/db');
 
 const getDependentsByDocument = async (dbClient, document) => {
     try {

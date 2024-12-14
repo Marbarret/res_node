@@ -1,5 +1,5 @@
 const express = require('express');
-const dependentController = require('../controllers/dependentController');
+const dependentController = require('../controller/dependentController');
 const router = express.Router();
 
 router.get('/', dependentController.getDependentsByDocument);
