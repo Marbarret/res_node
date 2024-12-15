@@ -33,29 +33,22 @@ const getUserByDocument = async (req, res) => {
     }
 };
 
-
 const createUser = async (req, res) => {
     try {
         const { responsible } = req.body;
-
         if (!responsible || !responsible.password || !responsible.password_confirm) {
             return res.status(400).json({ mensagem: 'Senha e confirmação de senha são obrigatórias.' });
         }
-
         if (responsible.password !== responsible.password_confirm) {
             return res.status(400).json({ mensagem: 'As senhas não coincidem.' });
         }
-
         const cpfExists = await userService.checkDocumentExists(req.dbClient, responsible.document);
         if (cpfExists) {
             return res.status(400).json({ mensagem: 'CPF já cadastrado' });
         }
-
         const hashedPassword = await bcrypt.hash(responsible.password, 10);
-
         responsible.password = hashedPassword;
         delete responsible.password_confirm;
-
         const user = await userService.createNewUser(req.dbClient, responsible);
         return res.status(201).json(user);
     } catch (error) {
@@ -64,6 +57,7 @@ const createUser = async (req, res) => {
     }
 };
 
+//Atualizar essa rota ainda falta algumas verificações
 const updateUser = async (req, res) => {
     const document = req.params.document;
     const updates = req.body;
@@ -96,7 +90,6 @@ const updateUser = async (req, res) => {
         res.status(500).json({ mensagem: 'Erro ao atualizar usuário.', erro: err.message });
     }
 };
-
 
 const patchUser = async (req, res) => {
     const document = req.params.document;

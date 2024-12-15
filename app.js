@@ -40,10 +40,9 @@ app.use(async (req, res, next) => {
 
 app.use('/users', userRoute);
 app.use('/login', authRoute);
-app.use('/users/:document/dependents', dependentRoute);
+app.use(dependentRoute);
 app.use('/auth', authRoutes);
 app.use('/api', protectedRoutes);
-
 
 app.use((req, res, next) => {
     const erro = new Error('Nenhuma rota encontrada');
@@ -64,7 +63,6 @@ app.use(async (req, res, next) => {
         } else {
             req.dbClient = client;
         }
-
         next();
     } catch (err) {
         console.error('Erro ao conectar ao MongoDB:', err);

@@ -2,9 +2,9 @@ const express = require('express');
 const dependentController = require('../controller/dependentController');
 const router = express.Router();
 
-router.get('/', dependentController.getDependentsByDocument);
-router.post('/', dependentController.addDependent);
-router.put('/:dependentId', dependentController.updateDependent);
-router.delete('/:dependentId', dependentController.deleteDependent);
+router.get('/users/:document/dependent', dependentController.listDependents);
+router.post('/users/:document/dependent', dependentController.addDependent);
+router.put('/users/:document/dependent/:dependentId', dependentController.updateDependent);
+router.delete('/users/:document/dependent/:dependentId', dependentController.deleteDependent);
 
 module.exports = router;

@@ -65,13 +65,11 @@ const patchUser = async (dbClient, document, partialAtt) => {
 const deleteUser = async (dbClient, document) => {
     try {
         const collection = getCollectionDB(dbClient, 'users', 'usuario');
-        const result = await collection.deleteOne({ 'responsible.document': document });
-        return { message: 'Usuário deletado com sucesso' };
+        return await collection.deleteOne({ 'responsible.document': document });
     } catch (error) {
         console.error('Erro ao deletar usuário:', error.message);
     }
 };
-
 
 const getUserByEmail = async (dbClient, email) => {
     const collection = getCollectionDB(dbClient, 'users', 'usuario');
