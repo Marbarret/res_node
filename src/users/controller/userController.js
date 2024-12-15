@@ -25,10 +25,14 @@ const getUserByDocument = async (req, res) => {
         }
         res.status(200).json(user);
     } catch (err) {
+        if (err.message === 'Usuário não encontrado') {
+            return res.status(404).json({ mensagem: err.message });
+        }
         console.error('Erro ao buscar usuário por documento:', err);
         res.status(500).json({ mensagem: 'Erro ao buscar usuário', erro: err.message });
     }
 };
+
 
 const createUser = async (req, res) => {
     try {
@@ -61,24 +65,17 @@ const createUser = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
+    const document = req.params.document;
+    const updates = req.body;
+
     try {
-        const userId = req.params.document;
-        const updates = { ...req.body };
-
-        const currentUser = await userService.getUserByDocument(req.dbClient, userId);
-
-        if (!currentUser) {
-            return res.status(404).json({ mensagem: 'Usuário não encontrado.' });
-        }
-
-        const allowedFields = ['fullName', 'email', 'contact', 'address'];
-        const fieldsToUpdate = {};
-
-        allowedFields.forEach((field) => {
-            if (updates[field] && updates[field] !== currentUser.responsible[field]) {
-                fieldsToUpdate[field] = updates[field];
+        const allowedFields = ['fullName', 'email', 'contact', 'password'];
+        const fieldsToUpdate = allowedFields.reduce((acc, field) => {
+            if (updates[field] && updates[field] !== currentUser[field]) {
+                acc[field] = updates[field];
             }
-        });
+            return acc;
+        }, {});
 
         if (fieldsToUpdate.password) {
             fieldsToUpdate.password = await bcrypt.hash(fieldsToUpdate.password, 10);
@@ -88,26 +85,24 @@ const updateUser = async (req, res) => {
             return res.status(400).json({ mensagem: 'Nenhuma alteração válida foi enviada.' });
         }
 
-        const result = await userService.updateUser(req.dbClient, userId, fieldsToUpdate);
-
-        if (result.modifiedCount > 0) {
-            return res.status(200).json({ mensagem: 'Usuário atualizado com sucesso.' });
-        } else {
-            return res.status(200).json({ mensagem: 'Nenhuma modificação foi realizada.' });
+        const result = await userService.updateUser(req.dbClient, document, fieldsToUpdate);
+        if (result.matchedCount === 0) {
+            return res.status(404).json({ mensagem: 'Usuário não encontrado para atualização.' });
         }
-    } catch (error) {
-        console.error('Erro ao atualizar usuário:', error.message);
-        return res.status(500).json({ mensagem: 'Erro ao atualizar usuário.' });
+
+        res.status(200).json({ mensagem: 'Usuário atualizado com sucesso.', dados: fieldsToUpdate });
+    } catch (err) {
+        console.error('Erro ao atualizar usuário:', err);
+        res.status(500).json({ mensagem: 'Erro ao atualizar usuário.', erro: err.message });
     }
 };
 
 
 const patchUser = async (req, res) => {
-    const id = req.params.id_usuario;
-    const atualizacaoParcial = req.body;
-
+    const document = req.params.document;
+    const partialAtt = req.body;
     try {
-        const result = await userService.patchUser(req.dbClient, id, atualizacaoParcial);
+        const result = await userService.patchUser(req.dbClient, document, partialAtt);
         if (result.matchedCount === 0) {
             return res.status(404).json({ mensagem: 'Usuário não encontrado' });
         }
@@ -119,10 +114,9 @@ const patchUser = async (req, res) => {
 };
 
 const deleteUser = async (req, res) => {
-    const id = req.params.id_usuario;
-
+    const document = req.params.document;
     try {
-        const result = await userService.deleteUser(req.dbClient, id);
+        const result = await userService.deleteUser(req.dbClient, document);
         if (result.deletedCount === 0) {
             return res.status(404).json({ mensagem: 'Usuário não encontrado' });
         }

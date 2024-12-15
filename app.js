@@ -1,10 +1,9 @@
-import express from "express"
+const express = require("express");
 const app = express();
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const { connectToDatabase, client } = require('./src/data/db');
 
-const courseRoute = require('./src/routes/course');
 const userRoute = require('./src/users/route/userRoute');
 const authRoute = require('./src/authetication/route/authRoute');
 const dependentRoute = require('./src/dependent/route/dependent');
@@ -39,7 +38,6 @@ app.use(async (req, res, next) => {
     }
 });
 
-app.use('/course', courseRoute);
 app.use('/users', userRoute);
 app.use('/login', authRoute);
 app.use('/users/:document/dependents', dependentRoute);
@@ -59,14 +57,12 @@ app.use(async (req, res, next) => {
             await client.connect();
         }
 
-        if (req.path.startsWith('/course')) {
-            req.dbClient = client.db('curso'); // Acesso ao DB 'curso' para rotas '/course'
-        } else if (req.path.startsWith('/users')) {
+        if (req.path.startsWith('/users')) {
             req.dbClient = client.db('users');
         } else if (req.path.match(/^\/[0-9]+\/dependents/)) {
             req.dbClient = client.db('users');
         } else {
-            req.dbClient = client; // Conexão padrão para outras rotas
+            req.dbClient = client;
         }
 
         next();

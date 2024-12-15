@@ -1,7 +1,6 @@
 const { ObjectId } = require('mongodb');
 const { getCollectionDB } = require('../../data/db');
 const bcrypt = require('bcrypt');
-const collectionDb = getCollectionDB(dbClient, 'users', 'usuario');
 
 const getAllUsers = async (dbClient) => {
     const collection = getCollectionDB(dbClient, 'users', 'usuario');
@@ -21,15 +20,13 @@ const checkDocumentExists = async (dbClient, document) => {
 
 const getUserByDocument = async (dbClient, document) => {
     try {
-        const db = dbClient.db('users');
-        const user = await db.collection('usuario').findOne({ 'responsible.document': document });
-        if (!user) {
-            throw new Error('Usuário não encontrado.');
-        }
+        const collection = getCollectionDB(dbClient, 'users', 'usuario');
+        const user = await collection.findOne({ document: document });
+        if (!user) { throw new Error('Usuário não encontrado'); }
         return user;
-    } catch (error) {
-        console.error('Erro ao buscar usuário:', error.message);
-        throw new Error('Erro ao buscar usuário: ' + error.message);
+    } catch (err) {
+        console.error('Erro ao buscar usuário:', err);
+        throw err;
     }
 };
 
@@ -37,38 +34,44 @@ const createNewUser = async (dbClient, newUser) => {
     const collection = getCollectionDB(dbClient, 'users', 'usuario');
     try {
         const result = await collection.insertOne(newUser);
-        return result.ops ? result.ops[0] : newUser;
+        return result.ops ? result.ops[0] : { message: 'Usuário cadastrado com sucesso' };
     } catch (err) {
-        if (err.code === 11000) {
-            throw new Error('CPF já cadastrado');
-        }
+        if (err.code === 11000) { throw new Error('CPF já cadastrado'); }
         throw err;
     }
 };
 
 const updateUser = async (dbClient, document, updates) => {
-    const collection = getCollectionDB(dbClient, 'users', 'usuario');
-    const result = await collection.updateOne(
-        { 'responsavel.cpf': document },
-        { $set: updates },
-        { upsert: false }
-    );
-    if (result.matchedCount === 0) {
-        throw new Error('Usuário não encontrado.');
-    };
-    return result;
+    try {
+        const collection = getCollectionDB(dbClient, 'users', 'usuario');
+        return await collection.updateOne(
+            { 'responsible.document': document },
+            { $set: updates }
+        );
+    } catch (error) {
+        throw new Error(`Erro ao atualizar usuário com CPF ${document}: ${error.message}`);
+    }
 };
 
-
-const patchUser = async (dbClient, id, atualizacaoParcial) => {
-    const collection = getCollectionDB(dbClient, 'users', 'usuario');
-    return await collection.updateOne({ _id: new ObjectId(id) }, { $set: atualizacaoParcial });
+const patchUser = async (dbClient, document, partialAtt) => {
+    try {
+        const collection = getCollectionDB(dbClient, 'users', 'usuario');
+        return await collection.updateOne({ 'responsible.document': document }, { $set: partialAtt });
+    } catch (error) {
+        console.error('Erro ao atualizar usuário:', error.message);
+    }
 };
 
-const deleteUser = async (dbClient, id) => {
-    const collection = getCollectionDB(dbClient, 'users', 'usuario');
-    return await collection.deleteOne({ _id: new ObjectId(id) });
+const deleteUser = async (dbClient, document) => {
+    try {
+        const collection = getCollectionDB(dbClient, 'users', 'usuario');
+        const result = await collection.deleteOne({ 'responsible.document': document });
+        return { message: 'Usuário deletado com sucesso' };
+    } catch (error) {
+        console.error('Erro ao deletar usuário:', error.message);
+    }
 };
+
 
 const getUserByEmail = async (dbClient, email) => {
     const collection = getCollectionDB(dbClient, 'users', 'usuario');
