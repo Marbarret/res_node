@@ -5,17 +5,19 @@ const { connectToDatabase, client } = require('./src/data/db');
 const cookieParser = require("cookie-parser");
 const session = require('express-session');
 
-const passport = require('./src/authetication/service/passportConfig');
+const passport = require('./src/service/passportConfig');
 
-const userRoute = require('./src/users/route/userRoute');
+const userRoute = require('./src/routes/userRoute');
+const CustomError = require("./src/utils/CustomError");
+const errorController = require("./src/controllers/errorController");
 // const authRoute = require('./src/authetication/route/authRoute');
 // const dependentRoute = require('./src/dependent/route/dependent');
 // const authRoutes = require('./src/authetication/route/authRoute');
 // const protectedRoutes = require('./src/authetication/route/protectedRoute');
 
+app.use(express.json());
 app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
 app.use(cookieParser('hello'));
 
 // Session padrão 
@@ -39,12 +41,10 @@ app.use((req, res, next) => {
         'Access-Control-Allow-Headers',
         'Content-Type, Accept, Authorization'
     );
-
     if (req.method === 'OPTIONS') {
         res.header('Access-Control-Allow-Methods', 'POST, PUT, PATCH, DELETE, GET');
         return res.status(200).send({});
     }
-
     next();
 });
 
@@ -68,10 +68,11 @@ app.post('/login', passport.authenticate('local'), (req, res) => {
 });
 
 app.use((req, res, next) => {
-    const erro = new Error('Nenhuma rota encontrada');
-    erro.status = 404;
+    const erro = new CustomError('Nenhuma rota encontrada', 404);
     next(erro);
 });
+
+app.use(errorController);
 
 app.use(async (req, res, next) => {
     try {

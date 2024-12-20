@@ -1,4 +1,4 @@
-const authService = require('../authetication/service/authService');
+const authService = require('../service/authService');
 
 const authenticateToken = (req, res, next) => {
     const token = req.headers['authorization']?.split(' ')[1];

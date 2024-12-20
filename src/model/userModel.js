@@ -42,7 +42,6 @@ const ResponsibleSchema = new Schema({
   address: { type: AddressSchema, required: true },
   document_type: { type: String },
   password: { type: String, required: true },
-  password_confirm: { type: String, required: true },
   terms: { type: Boolean, required: true }
 });
 

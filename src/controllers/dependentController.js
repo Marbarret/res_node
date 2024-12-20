@@ -1,4 +1,4 @@
-const dependentService = require('../service/dependentService');
+const dependentService = require('../dependent/service/dependentService');
 const { ObjectId } = require('mongodb');
 
 const listDependents = async (req, res) => {

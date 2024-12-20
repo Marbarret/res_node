@@ -1,8 +1,6 @@
-const { hashPassword } = require('../../utils/helpers');
-const userService = require('../service/userService');
-const bcrypt = require('bcrypt');
-// const jwt = require('jsonwebtoken');
-// const User = require('../model/userModel');
+const CustomError = require('../utils/CustomError');
+const { hashPassword } = require('../utils/helpers');
+const userService = require('../users/service/userService');
 
 const getAllUsers = async (req, res) => {
     try {
@@ -12,8 +10,7 @@ const getAllUsers = async (req, res) => {
         }
         res.status(200).json(users);
     } catch (err) {
-        console.error('Erro ao buscar usuários:', err);
-        res.status(500).json({ mensagem: 'Erro ao buscar Usuários', erro: err });
+        return new CustomError('Erro ao buscar usuários', 500);
     }
 };
 
@@ -37,11 +34,8 @@ const getUserByDocument = async (req, res) => {
 const createUser = async (req, res) => {
     try {
         const { responsible } = req.body;
-        if (!responsible || !responsible.password || !responsible.password_confirm) {
+        if (!responsible || !responsible.password) {
             return res.status(400).json({ mensagem: 'Senha e confirmação de senha são obrigatórias.' });
-        }
-        if (responsible.password !== responsible.password_confirm) {
-            return res.status(400).json({ mensagem: 'As senhas não coincidem.' });
         }
         const cpfExists = await userService.checkDocumentExists(req.dbClient, responsible.document);
         if (cpfExists) {
@@ -49,7 +43,6 @@ const createUser = async (req, res) => {
         }
         const hashedPassword = hashPassword(responsible.password);
         responsible.password = hashedPassword;
-        delete responsible.password_confirm;
         const user = await userService.createNewUser(req.dbClient, responsible);
         return res.status(201).json(user);
     } catch (error) {
