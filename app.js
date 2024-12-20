@@ -1,39 +1,43 @@
 const express = require("express");
 const app = express();
 const morgan = require('morgan');
-// const bodyParser = require('body-parser');
 const { connectToDatabase, client } = require('./src/data/db');
-
+const cookieParser = require("cookie-parser");
 const session = require('express-session');
+
 const passport = require('./src/authetication/service/passportConfig');
 
 const userRoute = require('./src/users/route/userRoute');
-const authRoute = require('./src/authetication/route/authRoute');
-const dependentRoute = require('./src/dependent/route/dependent');
-const authRoutes = require('./src/authetication/route/authRoute');
-const protectedRoutes = require('./src/authetication/route/protectedRoute');
-
-app.use(
-    session({
-        session: 'imnayeon-yoojeongyeon-hiraimomo-minatozakisana-parkjihyo-minasharon-kimdahyun-sonchaeyoung-choutzuyu',
-        resave: false,
-        saveUninitialized: false
-    })
-);
-
-app.use(passport.initialize());
-app.use(passport.session());
+// const authRoute = require('./src/authetication/route/authRoute');
+// const dependentRoute = require('./src/dependent/route/dependent');
+// const authRoutes = require('./src/authetication/route/authRoute');
+// const protectedRoutes = require('./src/authetication/route/protectedRoute');
 
 app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+app.use(cookieParser('hello'));
 
+// Session padrão 
+app.use(
+    session({
+        session: 'imnayeon-yoojeongyeon-hiraimomo-minatozakisana-parkjihyo-minasharon-kimdahyun-sonchaeyoung-choutzuyu',
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            maxAge: 3000 * 60
+        }
+    })
+);
+
+// app.use(passport.initialize());
+// app.use(passport.session());
 
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header(
         'Access-Control-Allow-Headers',
-        'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+        'Content-Type, Accept, Authorization'
     );
 
     if (req.method === 'OPTIONS') {
@@ -54,34 +58,13 @@ app.use(async (req, res, next) => {
 });
 
 app.use('/users', userRoute);
-app.use('/login', authRoute);
-app.use(dependentRoute);
-app.use('/auth', authRoutes);
-app.use('/api', protectedRoutes);
+// app.use('/login', authRoute);
+// app.use(dependentRoute);
+// app.use('/auth', authRoutes);
+// app.use('/api', protectedRoutes);
 
-app.post('/login', passport.authenticate('local', {
-    successRedirect: '/dashboard',
-    failureRedirect: '/login',
-    failureFlash: true, // Para mensagens de erro (se usar flash)
-}));
-
-app.get('/dashboard', (req, res) => {
-    if (req.isAuthenticated()) {
-      return res.send(`Bem-vindo, ${req.user.email}`);
-    }
-    res.redirect('/login');
-});
-
-app.get('/logout', (req, res) => {
-    req.logout(err => {
-      if (err) return next(err);
-      res.redirect('/login');
-    });
-});
-const path = require('path');
-
-app.get('/login', (req, res) => {
-  res.sendFile(path.join(__dirname, 'login_register.html')); // Ajuste o caminho conforme necessário
+app.post('/login', passport.authenticate('local'), (req, res) => {
+    res.send(`Bem-vindo, ${req.user.email}`);
 });
 
 app.use((req, res, next) => {

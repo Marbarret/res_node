@@ -1,3 +1,4 @@
+const { hashPassword } = require('../../utils/helpers');
 const userService = require('../service/userService');
 const bcrypt = require('bcrypt');
 // const jwt = require('jsonwebtoken');
@@ -46,7 +47,7 @@ const createUser = async (req, res) => {
         if (cpfExists) {
             return res.status(400).json({ mensagem: 'CPF já cadastrado' });
         }
-        const hashedPassword = await bcrypt.hash(responsible.password, 10);
+        const hashedPassword = hashPassword(responsible.password);
         responsible.password = hashedPassword;
         delete responsible.password_confirm;
         const user = await userService.createNewUser(req.dbClient, responsible);
@@ -72,7 +73,7 @@ const updateUser = async (req, res) => {
         }, {});
 
         if (fieldsToUpdate.password) {
-            fieldsToUpdate.password = await bcrypt.hash(fieldsToUpdate.password, 10);
+            fieldsToUpdate.password = hashPassword(fieldsToUpdate.password);
         }
 
         if (Object.keys(fieldsToUpdate).length === 0) {

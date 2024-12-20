@@ -11,4 +11,4 @@ Projeto voltado para auxiliar pais e responsaveis de alunos que usando transport
 ### Requisitos:
 - Node.js (v12 ou superior)
 - MongoDB (local ou em uma nuvem)
-- npm ou yarn
+- npm
