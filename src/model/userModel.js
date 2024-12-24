@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const AddressSchema = require('./commomModel');
 const { Schema } = mongoose;
 
 const TransPlanSchema = new Schema({
@@ -8,15 +9,6 @@ const TransPlanSchema = new Schema({
     collect: { type: String, required: true },
     delivery: { type: String, required: true }
   }
-});
-
-const AddressSchema = new Schema({
-  street: { type: String, required: true },
-  number: { type: String, required: true },
-  zone: { type: String, required: true },
-  city: { type: String, required: true },
-  state: { type: String, required: true },
-  zip: { type: String, required: true }
 });
 
 const DependentSchema = new Schema({
