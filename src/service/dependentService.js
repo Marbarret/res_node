@@ -6,7 +6,7 @@ const getDependentsByDocument = async (dbClient, document) => {
         const user = await dbClient
             .db('users')
             .collection('usuario')
-            .findOne({ document });
+            .findOne({ 'responsible.document.number': document });
         if (!user || !user.dependent) {
             return [];
         }
@@ -23,7 +23,7 @@ const addDependent = async (dbClient, document, newDependent) => {
         const user = await dbClient
             .db('users')
             .collection('usuario')
-            .findOne({ document });
+            .findOne({ 'responsible.document.number': document });
 
         if (!user) {
             throw new Error('Usuário não encontrado');
@@ -38,7 +38,7 @@ const addDependent = async (dbClient, document, newDependent) => {
             .db('users')
             .collection('usuario')
             .updateOne(
-                { document },
+                { 'responsible.document.number': document },
                 { $push: { dependent: newDependentWithId } }
             );
 

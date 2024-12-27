@@ -1,4 +1,4 @@
-const dependentService = require('../dependent/service/dependentService');
+const dependentService = require('../service/dependentService');
 const { ObjectId } = require('mongodb');
 
 const listDependents = async (req, res) => {
@@ -22,6 +22,7 @@ const addDependent = async (req, res) => {
         const updatedUser = await dependentService.addDependent(
             req.dbClient, document, newDependent
         );
+        console.log(document);
         return res.status(200).json({ message: 'Dependente adicionado com sucesso' });
     } catch (error) {
         console.error('Erro ao adicionar dependente:', error.message);

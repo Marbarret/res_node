@@ -1,6 +1,7 @@
 const CustomError = require('../utils/CustomError');
 const { hashPassword } = require('../utils/helpers');
-const userService = require('../users/service/userService');
+const userService = require('../service/userService');
+const bcrypt = require('bcrypt');
 
 const getAllUsers = async (req, res) => {
     try {
@@ -10,11 +11,11 @@ const getAllUsers = async (req, res) => {
         }
         res.status(200).json(users);
     } catch (err) {
-        return new CustomError('Erro ao buscar usuários', 500);
+        return next(new CustomError('Erro ao buscar usuários', 500));
     }
 };
 
-const getUserByDocument = async (req, res) => {
+const getUserByDocument = async (req, res, next) => {
     const document = req.params.document;
     try {
         const user = await userService.getUserByDocument(req.dbClient, document);
@@ -23,28 +24,42 @@ const getUserByDocument = async (req, res) => {
         }
         res.status(200).json(user);
     } catch (err) {
-        if (err.message === 'Usuário não encontrado') {
-            return res.status(404).json({ mensagem: err.message });
-        }
-        console.error('Erro ao buscar usuário por documento:', err);
-        res.status(500).json({ mensagem: 'Erro ao buscar usuário', erro: err.message });
+        next(err);
+        // if (err.message === 'Usuário não encontrado') {
+        //     return res.status(404).json({ mensagem: err.message });
+        // }
+        // console.error('Erro ao buscar usuário por documento:', err);
+        // res.status(500).json({ mensagem: 'Erro ao buscar usuário', erro: err.message });
     }
 };
 
-const createUser = async (req, res) => {
+const createUser = async (req, res, next) => {
     try {
-        const { responsible } = req.body;
-        if (!responsible || !responsible.password) {
-            return res.status(400).json({ mensagem: 'Senha e confirmação de senha são obrigatórias.' });
+        const { responsible, password } = req.body;
+        if (!responsible || !responsible.fullName || !responsible.document) {
+            return res.status(400).json({ mensagem: 'Dados do responsavel são obrigatórias.' });
         }
-        const cpfExists = await userService.checkDocumentExists(req.dbClient, responsible.document);
-        if (cpfExists) {
-            return res.status(400).json({ mensagem: 'CPF já cadastrado' });
+
+        const { document_type, number } = responsible.document;
+
+        if(!['CPF', 'CNPJ'].includes(document_type)) {
+            return res.status(400).json({ mensagem: 'O tipo de documento deve ser CPF ou CNPJ.' });
         }
-        const hashedPassword = hashPassword(responsible.password);
+
+        if ((document_type === 'CPF' && number.length !== 11) || 
+            (document_type === 'CNPJ' && number.length !== 14)) {
+            return res.status(400).json({ mensagem: `${document_type} deve ter o número correto de caracteres.` });
+        }
+
+        const documentExists = await userService.checkDocumentExists(req.dbClient, responsible.document);
+        if (documentExists) {
+            return res.status(400).json({ mensagem: '${document_type} já cadastrado.' });
+        }
+        const hashedPassword = await bcrypt.hash(password, 10);
         responsible.password = hashedPassword;
-        const user = await userService.createNewUser(req.dbClient, responsible);
-        return res.status(201).json(user);
+
+        const entity = await userService.createNewUser(req.dbClient, responsible);
+        return res.status(201).json(entity);
     } catch (error) {
         console.error('Erro ao criar usuário:', error.message);
         return res.status(500).json({ mensagem: 'Erro ao criar usuário: ' + error.message });

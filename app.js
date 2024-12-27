@@ -11,7 +11,7 @@ const userRoute = require('./src/routes/userRoute');
 const CustomError = require("./src/utils/CustomError");
 const errorController = require("./src/controllers/errorController");
 // const authRoute = require('./src/authetication/route/authRoute');
-// const dependentRoute = require('./src/dependent/route/dependent');
+const dependentRoute = require('./src/routes/dependent');
 // const authRoutes = require('./src/authetication/route/authRoute');
 // const protectedRoutes = require('./src/authetication/route/protectedRoute');
 
@@ -59,7 +59,7 @@ app.use(async (req, res, next) => {
 
 app.use('/users', userRoute);
 // app.use('/login', authRoute);
-// app.use(dependentRoute);
+app.use(dependentRoute);
 // app.use('/auth', authRoutes);
 // app.use('/api', protectedRoutes);
 
