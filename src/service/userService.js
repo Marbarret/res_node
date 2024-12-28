@@ -10,7 +10,7 @@ const getAllUsers = async (dbClient) => {
 const checkDocumentExists = async (dbClient, document) => {
     try {
         const collection = getCollectionDB(dbClient, 'users', 'usuario');
-        const user = await collection.findOne({ document });
+        const user = await collection.findOne({ 'document.number': document });
         return !!user;
     } catch (error) {
         throw new Error('Erro ao verificar CPF: ' + error.message);
@@ -20,7 +20,7 @@ const checkDocumentExists = async (dbClient, document) => {
 const getUserByDocument = async (dbClient, document) => {
     try {
         const collection = getCollectionDB(dbClient, 'users', 'usuario');
-        const user = await collection.findOne({ document: document });
+        const user = await collection.findOne({ 'document.number': document });
         if (!user) { throw new Error('Usuário não encontrado'); }
         return user;
     } catch (err) {
@@ -44,7 +44,7 @@ const updateUser = async (dbClient, document, updates) => {
     try {
         const collection = getCollectionDB(dbClient, 'users', 'usuario');
         return await collection.updateOne(
-            { 'responsible.document': document },
+            { 'document.number': document},
             { $set: updates }
         );
     } catch (error) {
@@ -55,7 +55,7 @@ const updateUser = async (dbClient, document, updates) => {
 const patchUser = async (dbClient, document, partialAtt) => {
     try {
         const collection = getCollectionDB(dbClient, 'users', 'usuario');
-        return await collection.updateOne({ 'responsible.document': document }, { $set: partialAtt });
+        return await collection.updateOne({ 'document.number': document }, { $set: partialAtt });
     } catch (error) {
         console.error('Erro ao atualizar usuário:', error.message);
     }
@@ -64,7 +64,7 @@ const patchUser = async (dbClient, document, partialAtt) => {
 const deleteUser = async (dbClient, document) => {
     try {
         const collection = getCollectionDB(dbClient, 'users', 'usuario');
-        return await collection.deleteOne({ 'responsible.document': document });
+        return await collection.deleteOne({ 'document.number': document });
     } catch (error) {
         console.error('Erro ao deletar usuário:', error.message);
     }

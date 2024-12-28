@@ -15,7 +15,7 @@ const getAllUsers = async (req, res) => {
     }
 };
 
-const getUserByDocument = async (req, res, next) => {
+const getUserByDocument = async (req, res) => {
     const document = req.params.document;
     try {
         const user = await userService.getUserByDocument(req.dbClient, document);
@@ -24,12 +24,11 @@ const getUserByDocument = async (req, res, next) => {
         }
         res.status(200).json(user);
     } catch (err) {
-        next(err);
-        // if (err.message === 'Usuário não encontrado') {
-        //     return res.status(404).json({ mensagem: err.message });
-        // }
-        // console.error('Erro ao buscar usuário por documento:', err);
-        // res.status(500).json({ mensagem: 'Erro ao buscar usuário', erro: err.message });
+        if (err.message === 'Usuário não encontrado') {
+            return res.status(404).json({ mensagem: err.message });
+        }
+        console.error('Erro ao buscar usuário por documento:', err);
+        res.status(500).json({ mensagem: 'Erro ao buscar usuário', erro: err.message });
     }
 };
 
