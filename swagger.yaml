@@ -1,0 +1,257 @@
+swagger: '2.0'
+
+schemes:
+  - http
+  - https
+
+host: localhost:3000
+basePath: /busease-api/v1
+
+info:
+  version: 1.0.0
+  title: BusEase API
+  description: API para gerenciamento de transporte escolar, permitindo registro de usuários, dependentes e autenticação.
+  termsOfService: localhost:3000/busease-api/v1/termo-uso
+  contact:
+    name: Suporte BusEase
+    url: localhost:3000/busease-api/v1/suporte
+    email: suporte@email.com
+
+securityDefinitions:
+  BasicAuth:
+    type: basic
+
+security:
+  - BasicAuth: []
+
+consumes:
+  - application/json
+produces:
+  - application/json
+
+paths:
+  /users:
+    get:
+      tags:
+        - User
+      summary: Lista todos os usuários cadastrados
+      description: Retorna uma lista com todos os usuários registrados na base de dados.
+      operationId: getUsers
+      security:
+        - BasicAuth: []
+      responses:
+        200:
+          description: Sucesso
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        400:
+          description: Erro na requisição
+        401:
+          description: Acesso negado
+        500:
+          description: Erro interno
+
+    post:
+      tags:
+        - User
+      summary: Cadastra um novo usuário
+      description: Registra um novo usuário na base de dados.
+      operationId: createUser
+      parameters:
+        - in: body
+          name: user
+          description: Dados do usuário para registro
+          schema:
+            $ref: '#/definitions/CreateUser'
+      responses:
+        201:
+          description: Usuário criado com sucesso
+          schema:
+            $ref: '#/definitions/User'
+        400:
+          description: Dados inválidos fornecidos
+        500:
+          description: Erro no servidor
+
+  /users/{document}:
+    get:
+      tags:
+        - User
+      summary: Busca um usuário pelo CPF
+      description: Retorna as informações de um usuário com base no CPF fornecido.
+      operationId: getUserByDocument
+      parameters:
+        - in: path
+          name: document
+          type: string
+          required: true
+          description: CPF do usuário
+          example: "12345678901"
+      responses:
+        200:
+          description: Sucesso
+          schema:
+            $ref: '#/definitions/User'
+        404:
+          description: Usuário não encontrado
+        500:
+          description: Erro interno
+
+    patch:
+      tags:
+        - User
+      summary: Atualiza parcialmente um usuário
+      description: Modifica campos específicos de um usuário identificado pelo CPF.
+      operationId: patchUser
+      parameters:
+        - in: path
+          name: document
+          type: string
+          required: true
+          description: CPF do usuário
+          example: "12345678901"
+        - in: body
+          name: updatedData
+          description: Dados a serem atualizados
+          schema:
+            $ref: '#/definitions/User'
+      responses:
+        200:
+          description: Usuário atualizado com sucesso
+        404:
+          description: Usuário não encontrado
+        400:
+          description: Dados inválidos
+        500:
+          description: Erro interno
+
+    delete:
+      tags:
+        - User
+      summary: Remove um usuário pelo CPF
+      description: Exclui um usuário identificado pelo CPF fornecido.
+      operationId: deleteUser
+      parameters:
+        - in: path
+          name: document
+          type: string
+          required: true
+          description: CPF do usuário
+          example: "12345678901"
+      responses:
+        200:
+          description: Usuário removido com sucesso
+        404:
+          description: Usuário não encontrado
+        500:
+          description: Erro interno
+
+  /users/{document}/dependent:
+    get:
+      tags:
+        - Dependents
+      summary: Lista dependentes de um usuário
+      description: Retorna a lista de dependentes associados a um CPF específico.
+      operationId: getDependents
+      parameters:
+        - in: path
+          name: document
+          type: string
+          required: true
+          description: CPF do responsável
+          example: "12345678901"
+      responses:
+        200:
+          description: Sucesso
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Dependents'
+        404:
+          description: Dependentes não encontrados
+        500:
+          description: Erro interno
+
+    post:
+      tags:
+        - Dependents
+      summary: Adiciona um dependente a um usuário
+      description: Adiciona um dependente ao usuário identificado pelo CPF.
+      operationId: addDependent
+      parameters:
+        - in: path
+          name: document
+          type: string
+          required: true
+          description: CPF do responsável
+          example: "12345678901"
+        - in: body
+          name: dependent
+          description: Dados do dependente
+          schema:
+            $ref: '#/definitions/Dependents'
+      responses:
+        201:
+          description: Dependente adicionado com sucesso
+        400:
+          description: Dados inválidos fornecidos
+        500:
+          description: Erro interno
+
+definitions:
+  User:
+    type: object
+    properties:
+      id:
+        type: string
+      fullName:
+        type: string
+        example: "João Silva"
+      email:
+        type: string
+        example: "joao.silva@email.com"
+      document:
+        type: string
+        example: "12345678901"
+      phone:
+        type: string
+        example: "11999999999"
+      dependents:
+        type: array
+        items:
+          $ref: '#/definitions/Dependents'
+
+  Dependents:
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+        example: "Maria Silva"
+      relationship:
+        type: string
+        example: "Filha"
+      age:
+        type: integer
+        example: 10
+
+  CreateUser:
+    type: object
+    properties:
+      fullName:
+        type: string
+      email:
+        type: string
+      password:
+        type: string
+      confirmPassword:
+        type: string
+      phone:
+        type: string
+      document:
+        type: string
+      terms:
+        type: boolean
