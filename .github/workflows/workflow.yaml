@@ -1,6 +1,6 @@
 name: Continuos Integration
 
-on: [pull_request, push]
+on: pull_request
 
 jobs:
   continuos-integration:
@@ -12,9 +12,9 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 20.
-      - name: run install, build and test
+      - name: run install, start and test
         run: |
           npm install
-          npm run build
+          npm start
           npm run test
           

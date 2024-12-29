@@ -1,11 +1,14 @@
 const express = require('express');
 const dependentController = require('../controllers/dependentController');
+const authToken = require('../middlewares/authMiddleware');
 const router = express.Router();
 
-router.get('/users/:document/dependents', dependentController.listDependents);
-router.post('/users/:document/dependents', dependentController.addDependent);
-router.put('/users/:document/dependents', dependentController.updateDependent);
-router.delete('/users/:document/dependents', dependentController.deleteDependent);
-router.patch('/users/:document/dependents', dependentController.patchDependent);
+router.use(authToken.authenticateToken);
+
+router.get('/:document/dependents', dependentController.listDependents);
+router.post('/:document/dependents', dependentController.addDependent);
+router.put('/:document/dependents', dependentController.updateDependent);
+router.delete('/:document/dependents', dependentController.deleteDependent);
+router.patch('/:document/dependents', dependentController.patchDependent);
 
 module.exports = router;

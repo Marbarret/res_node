@@ -88,7 +88,6 @@ paths:
           type: string
           required: true
           description: CPF do usuário
-          example: "12345678901"
       responses:
         200:
           description: Sucesso
@@ -111,7 +110,6 @@ paths:
           type: string
           required: true
           description: CPF do usuário
-          example: "12345678901"
         - in: body
           name: updatedData
           description: Dados a serem atualizados
@@ -139,7 +137,6 @@ paths:
           type: string
           required: true
           description: CPF do usuário
-          example: "12345678901"
       responses:
         200:
           description: Usuário removido com sucesso
@@ -161,7 +158,6 @@ paths:
           type: string
           required: true
           description: CPF do responsável
-          example: "12345678901"
       responses:
         200:
           description: Sucesso
@@ -186,7 +182,6 @@ paths:
           type: string
           required: true
           description: CPF do responsável
-          example: "12345678901"
         - in: body
           name: dependent
           description: Dados do dependente

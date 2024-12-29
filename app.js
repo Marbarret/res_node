@@ -2,38 +2,17 @@ const express = require("express");
 const app = express();
 const morgan = require('morgan');
 const { connectToDatabase, client } = require('./src/data/db');
-const cookieParser = require("cookie-parser");
-const session = require('express-session');
-
-const passport = require('./src/service/passportConfig');
 
 const userRoute = require('./src/routes/userRoute');
 const CustomError = require("./src/utils/CustomError");
 const errorController = require("./src/controllers/errorController");
-// const authRoute = require('./src/authetication/route/authRoute');
+const authRoute = require('./src/routes/authRoute');
 const dependentRoute = require('./src/routes/dependent');
-// const authRoutes = require('./src/authetication/route/authRoute');
-// const protectedRoutes = require('./src/authetication/route/protectedRoute');
+const dbMiddleware = require('./src/middlewares/dbMiddleware');
 
 app.use(express.json());
 app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser('hello'));
-
-// Session padrão 
-app.use(
-    session({
-        session: 'imnayeon-yoojeongyeon-hiraimomo-minatozakisana-parkjihyo-minasharon-kimdahyun-sonchaeyoung-choutzuyu',
-        resave: false,
-        saveUninitialized: false,
-        cookie: {
-            maxAge: 3000 * 60
-        }
-    })
-);
-
-// app.use(passport.initialize());
-// app.use(passport.session());
 
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
@@ -48,24 +27,11 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use(async (req, res, next) => {
-    try {
-        req.dbClient = client;
-        next();
-    } catch (err) {
-        next(err);
-    }
-});
+app.use(dbMiddleware);
 
 app.use('/busease-api/v1/users', userRoute);
-// app.use('/login', authRoute);
-app.use('/busease-api/v1', dependentRoute);
-// app.use('/auth', authRoutes);
-// app.use('/api', protectedRoutes);
-
-app.post('/login', passport.authenticate('local'), (req, res) => {
-    res.send(`Bem-vindo, ${req.user.email}`);
-});
+app.use('/busease-api/v1/auth', authRoute);
+app.use('/busease-api/v1/users', dependentRoute);
 
 app.use((req, res, next) => {
     const erro = new CustomError('Nenhuma rota encontrada', 404);
@@ -73,25 +39,5 @@ app.use((req, res, next) => {
 });
 
 app.use(errorController);
-
-app.use(async (req, res, next) => {
-    try {
-        if (!client.topology || !client.topology.isConnected()) {
-            await client.connect();
-        }
-
-        if (req.path.startsWith('/users')) {
-            req.dbClient = client.db('users');
-        } else if (req.path.match(/^\/[0-9]+\/dependents/)) {
-            req.dbClient = client.db('users');
-        } else {
-            req.dbClient = client;
-        }
-        next();
-    } catch (err) {
-        console.error('Erro ao conectar ao MongoDB:', err);
-        next(err);
-    }
-});
 
 module.exports = app;
