@@ -57,9 +57,9 @@ app.use(async (req, res, next) => {
     }
 });
 
-app.use('/users', userRoute);
+app.use('/busease-api/v1/users', userRoute);
 // app.use('/login', authRoute);
-app.use(dependentRoute);
+app.use('/busease-api/v1', dependentRoute);
 // app.use('/auth', authRoutes);
 // app.use('/api', protectedRoutes);
 
