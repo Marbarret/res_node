@@ -71,7 +71,9 @@ paths:
           schema:
             $ref: '#/definitions/User'
         400:
-          description: Dados inválidos fornecidos
+          description: O tipo de documento deve ser CPF ou CNPJ.
+        401:
+          description: Documento já cadastrado.
         500:
           description: Erro no servidor
 
@@ -196,57 +198,102 @@ paths:
           description: Erro interno
 
 definitions:
-  User:
+  UserResult:
     type: object
     properties:
-      id:
-        type: string
       fullName:
         type: string
-        example: "João Silva"
+      geneticName:
+        type: string
       email:
         type: string
-        example: "joao.silva@email.com"
+      contact:
+        type: string
       document:
+        $ref: '#/definitions/Document'
+      address:
+        $ref: '#/definitions/Address'
+      photo: 
         type: string
-        example: "12345678901"
-      phone:
+      password:
         type: string
-        example: "11999999999"
-      dependents:
+        format: password
+      terms:
+        type: boolean
+      dependent:
         type: array
         items:
-          $ref: '#/definitions/Dependents'
+          $ref: '#/definitions/DependentGeral'
 
-  Dependents:
+  DependentGeral:
     type: object
     properties:
-      id:
-        type: string
-      name:
-        type: string
-        example: "Maria Silva"
+      geral:
+        $ref: '#/definitions/Padrao'
       relationship:
         type: string
         example: "Filha"
-      age:
-        type: integer
-        example: 10
+      school_name:
+        type: string
+      observation:
+        type: string
+      trans_plan:
+        type: string
 
   CreateUser:
     type: object
     properties:
+      role:
+        type: string
+        example: user or company
+      responsible:
+          $ref: '#/definitions/Padrao'
+      password:
+        type: string
+        format: password
+      terms:
+        type: boolean
+
+  Address:
+    type: object
+    properties:
+      street: 
+        type: string
+      number:
+        type: string
+      zone:
+        type: string
+      city:
+        type: string
+      state:
+        type: string
+      zip:
+        type: string
+
+  Document:
+    type: object
+    properties:
+      document_type:
+        type: string
+      number:
+        type: string
+
+  Padrao:
+    type: object
+    properties:
       fullName:
+        type: string
+      geneticName:
         type: string
       email:
         type: string
-      password:
-        type: string
-      confirmPassword:
-        type: string
-      phone:
+      contact:
         type: string
       document:
+        $ref: '#/definitions/Document'
+      address:
+        $ref: '#/definitions/Address'
+      photo: 
         type: string
       terms:
         type: boolean

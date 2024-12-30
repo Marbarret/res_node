@@ -52,7 +52,7 @@ const createUser = async (req, res, next) => {
 
         const documentExists = await userService.checkDocumentExists(req.dbClient, number);
         if (documentExists) {
-            return res.status(400).json({ mensagem: '${number} já cadastrado.' });
+            return res.status(401).json({ mensagem: 'Documento já cadastrado.' });
         }
         const hashedPassword = await bcrypt.hash(password, 10);
         responsible.password = hashedPassword;
