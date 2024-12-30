@@ -50,9 +50,9 @@ const createUser = async (req, res, next) => {
             return res.status(400).json({ mensagem: `${document_type} deve ter o número correto de caracteres.` });
         }
 
-        const documentExists = await userService.checkDocumentExists(req.dbClient, responsible.document);
+        const documentExists = await userService.checkDocumentExists(req.dbClient, number);
         if (documentExists) {
-            return res.status(400).json({ mensagem: '${document_type} já cadastrado.' });
+            return res.status(400).json({ mensagem: '${number} já cadastrado.' });
         }
         const hashedPassword = await bcrypt.hash(password, 10);
         responsible.password = hashedPassword;
@@ -65,7 +65,6 @@ const createUser = async (req, res, next) => {
     }
 };
 
-//Atualizar essa rota ainda falta algumas verificações
 const updateUser = async (req, res) => {
     const document = req.params.document;
     const updates = req.body;
