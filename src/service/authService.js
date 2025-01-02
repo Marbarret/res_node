@@ -17,7 +17,11 @@ const validateCredentials = async (dbClient, document, password) => {
         if(!user) {
             throw new Error('Usuário não encontrado');
         }
-    
+        
+        if (!user.isVerified) {
+            return res.status(403).json({ mensagem: 'Usuário não verificado. Complete o processo de verificação.' });
+        }
+        
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if(!isPasswordValid) {
             throw new Error('Senha invalida');

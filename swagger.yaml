@@ -297,3 +297,33 @@ definitions:
         type: string
       terms:
         type: boolean
+
+
+#         {
+#     "role": "user",
+#     "responsible": {
+#         "fullName": "Marcylene Barreto",
+#         "genericName": "Marcylene",
+#         "email": "responsavel@email.com",
+#         "contact": "11999999991",
+#         "document": {
+#             "document_type": "CPF",
+#             "number": "12345678907"
+#         },
+#         "address": {
+#             "street": "Rua Exemplo",
+#             "number": "123",
+#             "zone": "Bairro",
+#             "city": "Cidade",
+#             "state": "Estado",
+#             "zip": "12345678"
+#         },
+#         "photo": "url_da_foto.jpg",
+#         "terms": true
+#     },
+#     "verification": {
+#         "method": "sms"
+#     },
+#     "password": "senha1234567",
+#     "terms": true
+# }

@@ -36,11 +36,11 @@ const { Schema } = mongoose;
 
 const GenericUser = new Schema({
     fullName: { type: String, required: true },
-    genericName: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    contact: { type: String, required: true },
+    genericName: { type: String },
+    email: { type: String, unique: true },
+    contact: { type: String },
     document: { type: DocumentType, required: true },
-    address: { type: AddressSchema, required: true },
+    address: { type: AddressSchema },
     photo: { type: String }
 }, { timestamps: true });
 

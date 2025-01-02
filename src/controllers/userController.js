@@ -2,6 +2,7 @@ const CustomError = require('../utils/CustomError');
 const { hashPassword } = require('../utils/helpers');
 const userService = require('../service/userService');
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 
 const getAllUsers = async (req, res) => {
     try {
@@ -56,6 +57,11 @@ const createUser = async (req, res, next) => {
         }
         const hashedPassword = await bcrypt.hash(password, 10);
         responsible.password = hashedPassword;
+
+        responsible.verificationCode = crypto.randomInt(1000, 9999).toString();
+        responsible.isVerified = false;
+
+        console.log(`Código de verificação para ${responsible.fullName}: ${responsible.verificationCode}`);
 
         const entity = await userService.createNewUser(req.dbClient, responsible);
         return res.status(201).json(entity);
@@ -127,10 +133,35 @@ const deleteUser = async (req, res) => {
     }
 };
 
+const verifyUser = async (req, res, next) => {
+    try {
+        const { documentNumber, verificationCode } = req.body;
+        if (!documentNumber || !verificationCode) {
+            return res.status(400).json({ mensagem: 'Número do documento e código de verificação são obrigatórios.' });
+        }
+        
+        const user = await userService.getUserByDocument(req.dbClient, documentNumber);
+        if (!user) {
+            return res.status(404).json({ mensagem: 'Usuário não encontrado.' });
+        }
+
+        if (user.verificationCode !== verificationCode) {
+            return res.status(400).json({ mensagem: 'Código de verificação inválido.' });
+        }
+        await userService.updateUser(req.dbClient, documentNumber, { isVerified: true });
+
+        return res.status(200).json({ mensagem: 'Usuário verificado com sucesso!' });
+    } catch (error) {
+        console.error('Erro ao verificar usuário:', error.message);
+        return res.status(400).json({ mensagem: error.message });
+    }
+};
+
 module.exports = {
     getAllUsers,
     getUserByDocument,
     createUser,
+    verifyUser,
     updateUser,
     patchUser,
     deleteUser

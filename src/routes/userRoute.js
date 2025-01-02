@@ -5,6 +5,7 @@ const authToken = require('../middlewares/authMiddleware');
 
 router.get('/', userController.getAllUsers);
 router.get('/:document', userController.getUserByDocument);
+router.post('/verify', userController.verifyUser);
 router.post('/', userController.createUser);
 router.put('/:document', userController.updateUser);
 router.patch('/:document', userController.patchUser);

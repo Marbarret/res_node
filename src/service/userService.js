@@ -40,6 +40,25 @@ const createNewUser = async (dbClient, newUser) => {
     }
 };
 
+const verifyUser = async (dbClient, documentNumber, verificationCode) => {
+    const collection = getCollectionDB(dbClient, 'users', 'usuario');
+    const user = await collection.findOne({ "document.number": documentNumber });
+
+    if (!user) {
+        throw new Error('Usuário não encontrado.');
+    }
+
+    if (user.verificationCode === verificationCode) {
+        await collection.updateOne(
+            { "document.number": documentNumber },
+            { $set: { isVerified: true }, $unset: { verificationCode: "" } }
+        );
+        return { mensagem: 'Usuário verificado com sucesso!' };
+    } else {
+        throw new Error('Código de verificação inválido.');
+    }
+};
+
 const updateUser = async (dbClient, document, updates) => {
     try {
         const collection = getCollectionDB(dbClient, 'users', 'usuario');
@@ -81,6 +100,7 @@ module.exports = {
     getUserByDocument,
     getUserByEmail,
     createNewUser,
+    verifyUser,
     updateUser,
     patchUser,
     deleteUser,

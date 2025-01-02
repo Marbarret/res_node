@@ -11,14 +11,15 @@ const DependentSchema = new Schema({
 });
 
 const UserSchema = new Schema({
-  role: { type: String, enum: ['user', 'company'], require: true },
-  responsible: { type: commomModel.GenericUser, required: true },
+  role: { type: String, enum: ['user', 'company'] },
+  responsible: { type: commomModel.GenericUser },
   password: { type: String, required: true },
   dependent: { type: [DependentSchema] },
+  isVerified: { type: Boolean, default: false },
   verification: {
-    method: { type: String, enum: ['sms', 'email'] }
+    method: { type: String }
   },
-  terms: { type: Boolean, required: true }
+  terms: { type: Boolean }
 }, { _id: false });
 
 module.exports = mongoose.model('User', UserSchema);

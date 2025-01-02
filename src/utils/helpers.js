@@ -4,8 +4,12 @@ async function hashPassword(password) {
     const saltRounds = 10;
     const hash = await bcrypt.hash(password, saltRounds);
     return hash;
-  }
+};
 
-const comparePassword = (pass, hashed) => bcrypt.compareSync(pass, hashed)
+const generateRandomCode = () => {
+  return Math.floor(1000 + Math.random() * 9000).toString();
+};
 
-module.exports = { hashPassword, comparePassword }
+const comparePassword = (pass, hashed) => bcrypt.compareSync(pass, hashed);
+
+module.exports = { hashPassword, comparePassword, generateRandomCode }
