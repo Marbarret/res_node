@@ -1,25 +1,26 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const { getCollectionDB } = require('../data/db');
+const config = require('../config/config');
+const message = require('../utils/message');
 
-const SECRET_KEY = process.env.JWT_SECRET || 'não configurado';
+const db_name = config.database.collection.users;
+const collection_name = config.database.collection.client;
 
 const generateToken = (payload) => {
-    return jwt.sign(payload, SECRET_KEY);
+    return jwt.sign(payload, config.auth.jwtSecret);
 };
 
 const validateCredentials = async (dbClient, document, password) => {
     try {
-        console.log("Buscando usuário com documento:", document);
-
-        const collection = getCollectionDB(dbClient, 'users', 'usuario');
+        const collection = getCollectionDB(dbClient, db_name, collection_name);
         const user = await collection.findOne({ 'document.number': document });
         if(!user) {
             throw new Error('Usuário não encontrado');
         }
         
         if (!user.isVerified) {
-            return res.status(403).json({ mensagem: 'Usuário não verificado. Complete o processo de verificação.' });
+            return res.status(403).json({ mensagem: message.error.USER_INVALID_VERIFICATION });
         }
         
         const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -40,7 +41,7 @@ const validateCredentials = async (dbClient, document, password) => {
 
 const verifyToken = (token) => {
     try {
-        return jwt.verify(token, SECRET_KEY);
+        return jwt.verify(token, config.auth.jwtSecret);
     } catch (error) {
         console.log(error.message === 'jwt expired' ? 'Token expirado.' : 'Token Invalido');
     }

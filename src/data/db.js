@@ -1,8 +1,8 @@
 const { MongoClient, ServerApiVersion } = require('mongodb');
-require('dotenv').config();
+const config = require('../config/config');
 
-const uri = process.env.urlMongo;
-const client = new MongoClient(uri, {
+const client = new MongoClient(
+  config.database.mongoURI, {
   serverApi: {
     version: ServerApiVersion.v1,
     strict: true,
@@ -13,11 +13,6 @@ const client = new MongoClient(uri, {
 const getCollectionDB = (dbClient, dbName, collectionName) => {
   const db = dbClient.db(dbName);
   return db.collection(collectionName);
-};
-
-const ensureUniqueIndex = async (dbClient) => {
-  const collection = getCollectionDB(dbClient, 'users', 'usuario');
-  await collection.createIndex({ 'responsavel.cpf': 1 }, { unique: true });
 };
 
 async function connectToDatabase(dbName) {
@@ -35,6 +30,5 @@ async function connectToDatabase(dbName) {
 module.exports = {
   connectToDatabase,
   getCollectionDB,
-  ensureUniqueIndex,
   client
 };

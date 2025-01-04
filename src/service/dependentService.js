@@ -1,9 +1,13 @@
 const { ObjectId } = require('mongodb');
 const { getCollectionDB } = require('../data/db');
+const config = require('../config/config');
+
+const db_name = config.database.collection.users;
+const collection_name = config.database.collection.client;
 
 const getDependentsByDocument = async (dbClient, document) => {
     const cleanedDocument = document.trim();
-    const collection = getCollectionDB(dbClient, 'users', 'usuario');
+    const collection = getCollectionDB(dbClient, db_name, collection_name);
     const user = await collection.findOne({
         'document.number': cleanedDocument
     });
@@ -12,7 +16,7 @@ const getDependentsByDocument = async (dbClient, document) => {
 
 const addDependent = async (dbClient, document, newDependent) => {
     try {
-        const collection = getCollectionDB(dbClient, 'users', 'usuario');
+        const collection = getCollectionDB(dbClient, db_name, collection_name);
         const user = await collection.findOne({ 'document.number': document });
          if (!user) {
             throw new Error('Usuário não encontrado');
@@ -24,8 +28,8 @@ const addDependent = async (dbClient, document, newDependent) => {
         };
 
         const updatedUser = await dbClient
-            .db('users')
-            .collection('usuario')
+            .db(db_name)
+            .collection(collection_name)
             .updateOne(
                 { 'document.number': document },
                 { $push: { dependent: newDependentWithId } }
@@ -40,7 +44,7 @@ const addDependent = async (dbClient, document, newDependent) => {
 
 const updateDependent = async (dbClient, document, dependentId, updatedData) => {
     try {
-        const collection = getCollectionDB(dbClient, 'users', 'usuario');
+        const collection = getCollectionDB(dbClient, db_name, collection_name);
         console.log(dependentId, '<= dependentId para atualizar');
         const result = await collection.updateOne(
             { "document.number": document, "dependent._id": new ObjectId(dependentId) },
@@ -56,7 +60,7 @@ const updateDependent = async (dbClient, document, dependentId, updatedData) => 
 
 const deleteDependent = async (dbClient, document, dependentId) => {
     try {
-        const collection = getCollectionDB(dbClient, 'users', 'usuario');
+        const collection = getCollectionDB(dbClient, db_name, collection_name);
         const result = await collection.updateOne(
             { "document.number": document },
             { $pull: { dependent: { _id: new ObjectId(dependentId) } } }
@@ -70,7 +74,7 @@ const deleteDependent = async (dbClient, document, dependentId) => {
 
 const patchDependent = async (dbClient, document, dependentId, partialData) => {
     try {
-        const collection = getCollectionDB(dbClient, 'users', 'usuario');
+        const collection = getCollectionDB(dbClient, db_name, collection_name);
         const updateFields = {};
 
         for (const key in partialData) {
