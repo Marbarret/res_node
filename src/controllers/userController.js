@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const message = require('../utils/message');
 const validations = require('../utils/validations');
+const emailSender = require('../utils/emailSender');
 
 const getAllUsers = async (req, res) => {
     try {
@@ -39,11 +40,15 @@ const createUser = async (req, res, next) => {
         if (!responsible || !responsible.fullName || !responsible.document) {
             return res.status(400).json({ mensagem: message.error.RES_REQUIRED_DOCUMENT });
         }
-        const { number } = responsible.document;
+        if (!responsible.email || !/\S+@\S+\.\S+/.test(responsible.email)) {
+            return res.status(400).json({ mensagem: 'Erro ao validar email' });
+        }
+        
         if(!validations.isValidDocument(responsible.document)) {
             return res.status(400).json({ mensagem: message.error.INVALID_DOCUMENT });
         }
-
+        
+        const { number } = responsible.document;
         const documentExists = await userService.checkDocumentExists(req.dbClient, number);
         if (documentExists) {
             return res.status(401).json({ mensagem: message.error.DOC_ALREADY_EXISTS });
@@ -54,9 +59,20 @@ const createUser = async (req, res, next) => {
         responsible.verificationCode = crypto.randomInt(1000, 9999).toString();
         responsible.isVerified = false;
 
-        console.log(message.success.USER_VERIFICATION_CODE(responsible.verificationCode));
+        console.log(responsible.email);
+        console.log(responsible.verificationCode);
+        try {
+            await emailSender.sendVerificationEmail(responsible.email, responsible.verificationCode);
+        } catch (emailError) {
+            console.error('Erro ao enviar email:', emailError.message);
+            return res.status(500).json({ mensagem: message.error.EMAIL_NOT_SENT });
+        }
+        
         const entity = await userService.createNewUser(req.dbClient, responsible);
-        return res.status(201).json(entity);
+        return res.status(201).json({ 
+            mensagem: message.success.USER_CREATED,
+            usuario: { id: entity._id, fullName: responsible.fullName, email: responsible.email }
+        });
     } catch (error) {
         return res.status(500).json({ mensagem: message.error.ERROR_CREATED_USER });
     }
