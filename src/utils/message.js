@@ -5,7 +5,7 @@ const message = {
         VERIFICATION_SUCCESSFUL: 'Verificação realizada com sucesso.',
         USER_REMOVE_SUCCESSFUL: 'Usuário removido com sucesso',
         USER_VERIFICATION_CODE: (code) => 'Código de verificação: ',
-
+        RESEND_SUCCESSFUL: 'Código reenviado com sucesso.',
         //DEPENDENTE
         DEPENDENT_ADD: 'Dependente adicionado com sucesso.',
         DEPENDENT_UPDATE: 'Dependente atualizado com sucesso!',
@@ -26,7 +26,12 @@ const message = {
         INVALID_CODE_DOCUMENT: 'Número do documento e código de verificação são obrigatórios.',
         ERROR_VERIFYING_USER: 'Erro ao verificar usuário',
         USER_INVALID_VERIFICATION: 'Usuário não verificado. Complete o processo de verificação.',
-
+        INVALID_EMAIL: 'Erro ao validar e-mail',
+        EMAIL_NOT_SENT: 'Erro ao enviar e-mail',
+        INVALID_EMAIL_AND_CODE: 'E-mail ou código de verificação inválidos',
+        REQUIRED_EMAIL: 'Email é obrigatório.',
+        RESEND_CODE_FAILURE: 'Erro ao reenviar o código.',
+        UPDATE_CODE_FAILURE: 'Erro ao atualizar código de verificação.',
         // DEPENDENTE
         ERROR_DEPENDENT_UPDATE: 'Erro ao atualizar dependente',
         PARTIAL_DEPENDENT_ERROR: 'Dependente não atualizado parcialmente com sucesso!',

@@ -11,10 +11,10 @@ const generateToken = (payload) => {
     return jwt.sign(payload, config.auth.jwtSecret);
 };
 
-const validateCredentials = async (dbClient, document, password) => {
+const validateCredentials = async (dbClient, email, password) => {
     try {
         const collection = getCollectionDB(dbClient, db_name, collection_name);
-        const user = await collection.findOne({ 'document.number': document });
+        const user = await collection.findOne({ email });
         if(!user) {
             throw new Error('Usuário não encontrado');
         }
@@ -27,8 +27,8 @@ const validateCredentials = async (dbClient, document, password) => {
         if(!isPasswordValid) {
             throw new Error('Senha invalida');
         }
-        const payload = { document: user.document.number, userId: user._id };
-        if (!payload.document || !payload.userId) {
+        const payload = { email: user.email, userId: user._id };
+        if (!payload.email || !payload.userId) {
             throw new Error('Payload inválido.');
         }
         const token = generateToken(payload);

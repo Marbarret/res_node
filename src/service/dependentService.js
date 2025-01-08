@@ -34,7 +34,6 @@ const addDependent = async (dbClient, document, newDependent) => {
                 { 'document.number': document },
                 { $push: { dependent: newDependentWithId } }
             );
-        console.log(updatedUser);
         return updatedUser;
     } catch (error) {
         console.error('Erro ao adicionar dependente:', error.message);
@@ -50,7 +49,6 @@ const updateDependent = async (dbClient, document, dependentId, updatedData) => 
             { "document.number": document, "dependent._id": new ObjectId(dependentId) },
             { $set: { "dependent.$": updatedData } }
         );
-        console.log(result, '<= Resultado da atualização');
         return result;
     } catch (error) {
         console.error('Erro ao atualizar dependente:', error.message);

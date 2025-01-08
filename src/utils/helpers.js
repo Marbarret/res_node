@@ -6,10 +6,7 @@ async function hashPassword(password) {
     return hash;
 };
 
-const generateRandomCode = () => {
-  return Math.floor(1000 + Math.random() * 9000).toString();
-};
-
 const comparePassword = (pass, hashed) => bcrypt.compareSync(pass, hashed);
+const generateVerificationCode = () => crypto.randomInt(1000, 9999).toString();
 
-module.exports = { hashPassword, comparePassword, generateRandomCode }
+module.exports = { hashPassword, comparePassword, generateVerificationCode }

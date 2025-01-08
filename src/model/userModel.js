@@ -17,9 +17,14 @@ const UserSchema = new Schema({
   dependent: { type: [DependentSchema] },
   isVerified: { type: Boolean, default: false },
   verification: {
-    method: { type: String }
+    method: { type: String, enum: ['sms', 'email'], required: true  },
+    code: { type: String }
   },
-  terms: { type: Boolean }
-}, { _id: false });
+  terms: { type: Boolean },
+  biometrics: {
+    enabled: { type: Boolean, default: false }, 
+    identifier: { type: String },
+  },
+});
 
 module.exports = mongoose.model('User', UserSchema);

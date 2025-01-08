@@ -1,10 +1,10 @@
 const CustomError = require('../utils/CustomError');
 const userService = require('../service/userService');
 const bcrypt = require('bcrypt');
-const crypto = require('crypto');
 const message = require('../utils/message');
 const validations = require('../utils/validations');
 const emailSender = require('../utils/emailSender');
+const helpers = require('../utils/helpers')
 
 const getAllUsers = async (req, res) => {
     try {
@@ -28,20 +28,20 @@ const getUserByDocument = async (req, res) => {
         res.status(200).json(user);
     } catch (err) {
         if (err.message === message.error.FIND_USER_ERROR) {
-            return res.status(404).json({ mensagem: message.error.FIND_USER_ERROR });
+            return next(new CustomError(message.error.FIND_USER_ERROR, 404));
         }
-        res.status(500).json({ mensagem: message.error.FIND_USER_ERROR });
+        return next(new CustomError(message.error.FIND_ALL_USER_ERROR, 500));
     }
 };
 
-const createUser = async (req, res, next) => {
+const createUser = async (req, res) => {
     try {
         const { responsible, password } = req.body;
         if (!responsible || !responsible.fullName || !responsible.document) {
             return res.status(400).json({ mensagem: message.error.RES_REQUIRED_DOCUMENT });
         }
         if (!responsible.email || !/\S+@\S+\.\S+/.test(responsible.email)) {
-            return res.status(400).json({ mensagem: 'Erro ao validar email' });
+            return res.status(400).json({ mensagem: message.error.INVALID_EMAIL });
         }
         
         if(!validations.isValidDocument(responsible.document)) {
@@ -56,15 +56,11 @@ const createUser = async (req, res, next) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         responsible.password = hashedPassword;
 
-        responsible.verificationCode = crypto.randomInt(1000, 9999).toString();
+        responsible.verification.code = helpers.generateVerificationCode();
         responsible.isVerified = false;
-
-        console.log(responsible.email);
-        console.log(responsible.verificationCode);
         try {
-            await emailSender.sendVerificationEmail(responsible.email, responsible.verificationCode);
+            await emailSender.sendVerificationEmail(responsible.email, responsible.verification.code);
         } catch (emailError) {
-            console.error('Erro ao enviar email:', emailError.message);
             return res.status(500).json({ mensagem: message.error.EMAIL_NOT_SENT });
         }
         
@@ -137,14 +133,14 @@ const deleteUser = async (req, res) => {
     }
 };
 
-const verifyUser = async (req, res, next) => {
+const verifyUser = async (req, res) => {
     try {
-        const { documentNumber, verificationCode } = req.body;
-        if (!documentNumber || !verificationCode) {
-            return res.status(400).json({ mensagem: message.error.INVALID_CODE_DOCUMENT });
+        const { email, verificationCode } = req.body;
+        if (!email || !verificationCode) {
+            return res.status(400).json({ mensagem: message.error.INVALID_EMAIL_AND_CODE });
         }
 
-        const user = await userService.getUserByDocument(req.dbClient, documentNumber);
+        const user = await userService.getUserByEmail(req.dbClient, email);
         if (!user) {
             return res.status(404).json({ mensagem: message.error.FIND_USER_ERROR });
         }
@@ -152,10 +148,41 @@ const verifyUser = async (req, res, next) => {
         if (user.verificationCode !== verificationCode) {
             return res.status(400).json({ mensagem: message.error.INVALID_VERIFICATION_CODE });
         }
-        await userService.updateUser(req.dbClient, documentNumber, { isVerified: true });
+        await userService.verifyUser(req.dbClient, email, verificationCode);
         return res.status(200).json({ mensagem:  message.success.VERIFICATION_SUCCESSFUL });
     } catch (error) {
         return res.status(400).json({ mensagem: message.error.ERROR_VERIFYING_USER });
+    }
+};
+
+const resendVerificationCode = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ mensagem: message.error.REQUIRED_EMAIL });
+        }
+
+        const user = await userService.getUserByEmail(req.dbClient, email);
+        if (!user) {
+            return res.status(404).json({ mensagem: message.error.FIND_USER_ERROR });
+        }
+
+        const newVerificationCode = helpers.generateVerificationCode();
+        const updatedUser = await userService.updateVerificationCode(
+            req.dbClient, user._id,
+            newVerificationCode
+        );
+
+        if (!updatedUser) {
+            return res.status(500).json({ mensagem: message.error.UPDATE_CODE_FAILURE });
+        }
+
+        await emailSender.sendVerificationEmail(email, newVerificationCode);
+        return res.status(200).json({ mensagem: message.success.RESEND_SUCCESSFUL });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ mensagem: message.error.RESEND_CODE_FAILURE });
     }
 };
 
@@ -166,5 +193,6 @@ module.exports = {
     verifyUser,
     updateUser,
     patchUser,
+    resendVerificationCode,
     deleteUser
 };

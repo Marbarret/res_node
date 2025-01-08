@@ -44,9 +44,9 @@ const createNewUser = async (dbClient, newUser) => {
     }
 };
 
-const verifyUser = async (dbClient, documentNumber, verificationCode) => {
+const verifyUser = async (dbClient, email, verificationCode) => {
     const collection = getCollectionDB(dbClient, db_name, collection_name);
-    const user = await collection.findOne({ "document.number": documentNumber });
+    const user = await collection.findOne({ email });
 
     if (!user) {
         throw new Error('Usuário não encontrado.');
@@ -54,7 +54,7 @@ const verifyUser = async (dbClient, documentNumber, verificationCode) => {
 
     if (user.verificationCode === verificationCode) {
         await collection.updateOne(
-            { "document.number": documentNumber },
+            { email },
             { $set: { isVerified: true }, $unset: { verificationCode: "" } }
         );
         return { mensagem: 'Usuário verificado com sucesso!' };
@@ -94,9 +94,23 @@ const deleteUser = async (dbClient, document) => {
 };
 
 const getUserByEmail = async (dbClient, email) => {
+    try {
+        const collection = getCollectionDB(dbClient, db_name, collection_name);
+        const user = await collection.findOne({ email });
+        if (!user) { throw new Error('Email não encontrado'); }
+        return user;
+    } catch (error) {
+        console.error('Email não encontrado', error.message)
+    }
+};
+
+const updateVerificationCode = async (dbClient, userId, newCode) => {
     const collection = getCollectionDB(dbClient, db_name, collection_name);
-    const user = await collection.findOne({ email: email.trim() });
-    return user;
+    return await collection.findOneAndUpdate(
+        { _id: new ObjectId(userId) },
+        { $set: { verificationCode: newCode } },
+        { returnDocument: 'after' }
+    );
 };
 
 module.exports = {
@@ -108,5 +122,6 @@ module.exports = {
     updateUser,
     patchUser,
     deleteUser,
+    updateVerificationCode,
     checkDocumentExists
 };
