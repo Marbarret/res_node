@@ -8,59 +8,130 @@ The Busease API enables the management of school transportation services by prov
 - MongoDB (Atlas)
 - npm
 
-## API Endpoints
- **Base URL**
- - Local: `http://localhost:5000`
-- Production: `http://busease/v1/`
+## API Base Information
 
-## Authentication
-**Register User**
+- Base Path: /busease-api/v1
+- Version: 1.0
+- Schemes: HTTP, HTTPS
 
-POST `/v1/..`
+## Endpoints
+**List all users**
 
-Description: Registers a new user.
+- URL: `/bse/`
+- Method: GET
+- Description: Retrieves all registered users.
+
+**Create a new user**
+
+- URL: ```/bse/```
+- Method: POST
+- Description: Registers a new user.
 
 Request Body:
 ```http
+{
+  "role": "string",
+  "responsible": {
+    "fullName": "string",
+    "email": "string",
+    "document": {
+      "document_type": "string",
+      "number": "string"
+    },
+  },
+  "password": "string",
+  "terms": true
+}
+```
+**Get User by Document**
+
+- URL: ```/bse/{document}```
+- Method: GET
+- Description: Retrieves user details by Document.
+- Path Parameters:
+  - document: string (document)
+
+**Get User by E-mail**
+
+- URL: ```/bse/{email}```
+- Method: GET
+- Description: Retrieves user details by E-mail.
+- Path Parameters:
+  - email: string (email)
+
+**Update User Partially**
+
+- URL: ```/bse/{document}```
+- Method: PATCH
+- Description: Updates specific user fields by Document.
+- Path Parameters:
+  - document: string (document)
+
+**Delete User**
+
+- URL: ```/bse/{document}```
+- Method: DELETE
+- Description: Delete user by Document.
+- Path Parameters:
+  - document: string (document)
+
+### Dependents
+**List Dependents**
+
+- URL: ```/bse/{document}/dependent```
+- Method: GET
+- Description: Retrieves a list of dependents for a given document.
+- Path Parameters:
+  - document: string (document)
+
+**Add a Dependent**
+
+- URL: ```/bse/{document}/dependent```
+- Method: POST
+- Description: Adds a dependent to a user.
+- Path Parameters:
+  - document: string (document)
+
+
+### Authentication
+**Login**
+
+- URL: ```/auth/login```
+- Method: POST
+- Description: Authenticates a user and returns an access token.
+- Request Body:
+```http
 {  
-  "fullName": "string",  
   "email": "string",  
   "password": "string"  
 }
 ```
 
-**Login User**
+**Verify User**
 
-POST `/v1/..`
-
-Description: Login a user.
-
-Request Body:
+- URL: ```/bse/verify```
+- Method: POST
+- Description: Sends a verification code to the user’s email for account validation.
+- Request Body:
 ```http
-{  
-  "email": "string",  
-  "password": "string"  
+{
+  "email": "string",
+  "verificationCode": "string"
 }
 ```
-## User Management
-#### Get User Profile
 
-GET `/v1/users/{id}`
+**Resend Verification Code**
 
-Description: Fetches the profile of a specific user.
-
-Response:
+- URL: ```/bse/resend-code/```
+- Method: POST
+- Description: Resends the account verification code to the user’s email.
+- Request Body:
 ```http
-{  
-  "fullName": "string",  
-  "email": "string", 
-  "dependent": {  
-    "planName": "string",  
-    "remainingDays": "number"  
-  }  
-}  
+{
+  "email": "string"
+}
 ```
-
+ 
 ## Error Handling
 #### All error responses follow the format:
 ```http
@@ -69,7 +140,4 @@ Response:
   "message": "string"  
 } 
 ```
-
-## Licença
-
 
