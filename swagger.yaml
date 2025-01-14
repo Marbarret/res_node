@@ -1,329 +1,382 @@
-swagger: '2.0'
-
-schemes:
-  - http
-  - https
-
-host: localhost:3000
-basePath: /busease-api/v1
-
+openapi: 3.0.0
 info:
-  version: 1.0.0
-  title: BusEase API
-  description: API para gerenciamento de transporte escolar, permitindo registro de usuários, dependentes e autenticação.
-  termsOfService: localhost:3000/busease-api/v1/termo-uso
+  version: "1.0.0"
+  title: "BusEase API"
+  description: "API para gerenciamento de transporte escolar, permitindo registro de usuários, dependentes e autenticação."
+  termsOfService: "http://localhost:3000/busease-api/v1/termo-uso"
   contact:
-    name: Suporte BusEase
-    url: localhost:3000/busease-api/v1/suporte
-    email: suporte@email.com
-
-securityDefinitions:
-  BasicAuth:
-    type: basic
-
-security:
-  - BasicAuth: []
-
-consumes:
-  - application/json
-produces:
-  - application/json
-
+    name: "Suporte BusEase"
+    url: "http://localhost:3000/busease-api/v1/suporte"
+    email: "suporte@email.com"
+servers:
+  - url: "http://localhost:3000"
+    description: "Local server"
+  - url: "https://localhost:3000"
+    description: "Secure server"
 paths:
-  /users:
+  /bse/:
     get:
       tags:
         - User
-      summary: Lista todos os usuários cadastrados
-      description: Retorna uma lista com todos os usuários registrados na base de dados.
+      summary: "Lista todos os usuários cadastrados"
+      description: "Retorna uma lista com todos os usuários registrados na base de dados."
       operationId: getUsers
       security:
         - BasicAuth: []
       responses:
-        200:
-          description: Sucesso
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/User'
-        400:
-          description: Erro na requisição
-        401:
-          description: Acesso negado
-        500:
-          description: Erro interno
-
+        '200':
+          description: "Sucesso"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Padrao"
+        '400':
+          description: "Erro na requisição"
+        '401':
+          description: "Acesso negado"
+        '500':
+          description: "Erro interno"
     post:
       tags:
         - User
-      summary: Cadastra um novo usuário
-      description: Registra um novo usuário na base de dados.
+      summary: "Cadastra um novo usuário"
+      description: "Registra um novo usuário na base de dados."
       operationId: createUser
-      parameters:
-        - in: body
-          name: user
-          description: Dados do usuário para registro
-          schema:
-            $ref: '#/definitions/CreateUser'
+      requestBody:
+        description: "Dados do usuário para registro"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUser"
       responses:
-        201:
-          description: Usuário criado com sucesso
-          schema:
-            $ref: '#/definitions/User'
-        400:
-          description: O tipo de documento deve ser CPF ou CNPJ.
-        401:
-          description: Documento já cadastrado.
-        500:
-          description: Erro no servidor
-
-  /users/{document}:
+        '201':
+          description: "Usuário criado com sucesso"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResult"
+        '400':
+          description: "O tipo de documento deve ser CPF ou CNPJ."
+        '401':
+          description: "Documento já cadastrado."
+        '500':
+          description: "Erro no servidor"
+  /bse/{document}:
     get:
       tags:
         - User
-      summary: Busca um usuário pelo CPF
-      description: Retorna as informações de um usuário com base no CPF fornecido.
+      summary: "Busca um usuário pelo CPF"
+      description: "Retorna as informações de um usuário com base no CPF fornecido."
       operationId: getUserByDocument
       parameters:
-        - in: path
-          name: document
-          type: string
+        - name: document
+          in: path
           required: true
-          description: CPF do usuário
-      responses:
-        200:
-          description: Sucesso
+          description: "CPF do usuário"
           schema:
-            $ref: '#/definitions/User'
-        404:
-          description: Usuário não encontrado
-        500:
-          description: Erro interno
-
+            type: string
+      responses:
+        '200':
+          description: "Sucesso"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResult"
+        '404':
+          description: "Usuário não encontrado"
+        '500':
+          description: "Erro interno"
     patch:
       tags:
         - User
-      summary: Atualiza parcialmente um usuário
-      description: Modifica campos específicos de um usuário identificado pelo CPF.
+      summary: "Atualiza parcialmente um usuário"
+      description: "Modifica campos específicos de um usuário identificado pelo CPF."
       operationId: patchUser
       parameters:
-        - in: path
-          name: document
-          type: string
+        - name: document
+          in: path
           required: true
-          description: CPF do usuário
-        - in: body
-          name: updatedData
-          description: Dados a serem atualizados
+          description: "CPF do usuário"
           schema:
-            $ref: '#/definitions/User'
+            type: string
+      requestBody:
+        description: "Dados a serem atualizados"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUser"
       responses:
-        200:
-          description: Usuário atualizado com sucesso
-        404:
-          description: Usuário não encontrado
-        400:
-          description: Dados inválidos
-        500:
-          description: Erro interno
-
+        '200':
+          description: "Usuário atualizado com sucesso"
+        '404':
+          description: "Usuário não encontrado"
+        '400':
+          description: "Dados inválidos"
+        '500':
+          description: "Erro interno"
     delete:
       tags:
         - User
-      summary: Remove um usuário pelo CPF
-      description: Exclui um usuário identificado pelo CPF fornecido.
+      summary: "Remove um usuário pelo CPF"
+      description: "Exclui um usuário identificado pelo CPF fornecido."
       operationId: deleteUser
       parameters:
-        - in: path
-          name: document
-          type: string
+        - name: document
+          in: path
           required: true
-          description: CPF do usuário
+          description: "CPF do usuário"
+          schema:
+            type: string
       responses:
-        200:
-          description: Usuário removido com sucesso
-        404:
-          description: Usuário não encontrado
-        500:
-          description: Erro interno
-
-  /users/{document}/dependent:
+        '200':
+          description: "Usuário removido com sucesso"
+        '404':
+          description: "Usuário não encontrado"
+        '500':
+          description: "Erro interno"
+  /bse/{document}/dependent:
     get:
       tags:
         - Dependents
-      summary: Lista dependentes de um usuário
-      description: Retorna a lista de dependentes associados a um CPF específico.
+      summary: "Lista dependentes de um usuário"
+      description: "Retorna a lista de dependentes associados a um CPF específico."
       operationId: getDependents
       parameters:
-        - in: path
-          name: document
-          type: string
+        - name: document
+          in: path
           required: true
-          description: CPF do responsável
-      responses:
-        200:
-          description: Sucesso
+          description: "CPF do responsável"
           schema:
-            type: array
-            items:
-              $ref: '#/definitions/Dependents'
-        404:
-          description: Dependentes não encontrados
-        500:
-          description: Erro interno
-
+            type: string
+      responses:
+        '200':
+          description: "Sucesso"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DependentGeral"
+        '404':
+          description: "Dependentes não encontrados"
+        '500':
+          description: "Erro interno"
     post:
       tags:
         - Dependents
-      summary: Adiciona um dependente a um usuário
-      description: Adiciona um dependente ao usuário identificado pelo CPF.
+      summary: "Adiciona um dependente a um usuário"
+      description: "Adiciona um dependente ao usuário identificado pelo CPF."
       operationId: addDependent
       parameters:
-        - in: path
-          name: document
-          type: string
+        - name: document
+          in: path
           required: true
-          description: CPF do responsável
-        - in: body
-          name: dependent
-          description: Dados do dependente
+          description: "CPF do responsável"
           schema:
-            $ref: '#/definitions/Dependents'
+            type: string
+      requestBody:
+        description: "Dados do dependente"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DependentGeral"
       responses:
-        201:
-          description: Dependente adicionado com sucesso
-        400:
-          description: Dados inválidos fornecidos
-        500:
-          description: Erro interno
-
-definitions:
-  UserResult:
-    type: object
-    properties:
-      fullName:
-        type: string
-      geneticName:
-        type: string
-      email:
-        type: string
-      contact:
-        type: string
-      document:
-        $ref: '#/definitions/Document'
-      address:
-        $ref: '#/definitions/Address'
-      photo: 
-        type: string
-      password:
-        type: string
-        format: password
-      terms:
-        type: boolean
-      dependent:
-        type: array
-        items:
-          $ref: '#/definitions/DependentGeral'
-
-  DependentGeral:
-    type: object
-    properties:
-      geral:
-        $ref: '#/definitions/Padrao'
-      relationship:
-        type: string
-        example: "Filha"
-      school_name:
-        type: string
-      observation:
-        type: string
-      trans_plan:
-        type: string
-
-  CreateUser:
-    type: object
-    properties:
-      role:
-        type: string
-        example: user or company
-      responsible:
-          $ref: '#/definitions/Padrao'
-      password:
-        type: string
-        format: password
-      terms:
-        type: boolean
-
-  Address:
-    type: object
-    properties:
-      street: 
-        type: string
-      number:
-        type: string
-      zone:
-        type: string
-      city:
-        type: string
-      state:
-        type: string
-      zip:
-        type: string
-
-  Document:
-    type: object
-    properties:
-      document_type:
-        type: string
-      number:
-        type: string
-
-  Padrao:
-    type: object
-    properties:
-      fullName:
-        type: string
-      geneticName:
-        type: string
-      email:
-        type: string
-      contact:
-        type: string
-      document:
-        $ref: '#/definitions/Document'
-      address:
-        $ref: '#/definitions/Address'
-      photo: 
-        type: string
-      terms:
-        type: boolean
-
-
-#         {
-#     "role": "user",
-#     "responsible": {
-#         "fullName": "Marcylene Barreto",
-#         "genericName": "Marcylene",
-#         "email": "responsavel@email.com",
-#         "contact": "11999999991",
-#         "document": {
-#             "document_type": "CPF",
-#             "number": "12345678907"
-#         },
-#         "address": {
-#             "street": "Rua Exemplo",
-#             "number": "123",
-#             "zone": "Bairro",
-#             "city": "Cidade",
-#             "state": "Estado",
-#             "zip": "12345678"
-#         },
-#         "photo": "url_da_foto.jpg",
-#         "terms": true
-#     },
-#     "verification": {
-#         "method": "sms"
-#     },
-#     "password": "senha1234567",
-#     "terms": true
-# }
+        '201':
+          description: "Dependente adicionado com sucesso"
+        '400':
+          description: "Dados inválidos fornecidos"
+        '500':
+          description: "Erro interno"
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: "Login de usuário"
+      description: "O usuário faz login com a senha e e-mail cadastrados, e é gerado um token para acesso aos endpoints especificos."
+      operationId: login
+      requestBody:
+        description: "Credenciais de login"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Login"
+      responses:
+        '200':
+          description: "Login realizado!"
+        '400':
+          description: "Dados inválidos"
+        '500':
+          description: "Erro interno"
+  /bse/verify:
+    post:
+      tags:
+        - Auth
+      summary: "Verificação de usuário"
+      description: "Enviado um código para o usuário via e-mail para validação de conta."
+      operationId: verify
+      requestBody:
+        description: "Dados para verificação"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Verify"
+      responses:
+        '200':
+          description: "Usuário verificado com sucesso!"
+        '400':
+          description: "Dados inválidos"
+        '500':
+          description: "Erro interno"
+  /bse/resend-code/:
+    post:
+      tags:
+        - Auth
+      summary: "Reenvia o código de verificação"
+      description: "Caso o usuário solite reenvio do código de verificação de conta."
+      operationId: resend-code
+      requestBody:
+        description: "E-mail cadastrado"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Resend-Code"
+      responses:
+        '200':
+          description: "Código reenviado para o e-mail"
+        '400':
+          description: "Dados inválidos"
+        '500':
+          description: "Erro interno"
+components:
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+  schemas:
+    UserResult:
+      type: object
+      properties:
+        fullName:
+          type: string
+        geneticName:
+          type: string
+        email:
+          type: string
+        contact:
+          type: string
+        document:
+          $ref: "#/components/schemas/Document"
+        address:
+          $ref: "#/components/schemas/Address"
+        photo:
+          type: string
+        password:
+          type: string
+          format: password
+        terms:
+          type: boolean
+    DependentGeral:
+      type: object
+      properties:
+        geral:
+          $ref: "#/components/schemas/Padrao"
+        relationship:
+          type: string
+          example: "Filha"
+        school_name:
+          type: string
+        observation:
+          type: string
+        trans_plan:
+          type: string
+    CreateUser:
+      type: object
+      properties:
+        role:
+          type: string
+          example: user or company
+        responsible:
+          $ref: "#/components/schemas/Padrao"
+        password:
+          type: string
+          format: password
+        terms:
+          type: boolean
+    Address:
+      type: object
+      properties:
+        street:
+          type: string
+        number:
+          type: string
+        zone:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zip:
+          type: string
+    Document:
+      type: object
+      properties:
+        document_type:
+          type: string
+          example: 'CPF or CNPJ'
+        number:
+          type: string
+          minLength: 11
+          example: '12345678900'
+    Padrao:
+      type: object
+      properties:
+        fullName:
+          type: string
+        firstName:
+          type: string
+        email:
+          type: string
+        contact:
+          type: string
+        document:
+          $ref: "#/components/schemas/Document"
+        address:
+          $ref: "#/components/schemas/Address"
+        photo:
+          type: string
+    UpdateUser:
+      type: object
+      properties:
+        fullName:
+          type: string
+        firstName:
+          type: string
+        email:
+          type: string
+    Verify:
+      type: object
+      properties:
+        email:
+          type: string
+        verificationCode:
+          type: string
+    Resend-Code:
+      type: object
+      properties:
+        email:
+          type: string
+    Login:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
