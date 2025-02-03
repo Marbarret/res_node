@@ -18,7 +18,6 @@ const { Schema } = mongoose;
     },
     number: { 
         type: String, 
-        required: true, 
         validate: {
             validator: function(value) {
                 if (!this.document_type) return false;
@@ -39,7 +38,7 @@ const GenericUser = new Schema({
     genericName: { type: String },
     email: { type: String, unique: true },
     contact: { type: String },
-    document: { type: DocumentType, required: true },
+    document: { type: DocumentType },
     address: { type: AddressSchema },
     photo: { type: String }
 }, { timestamps: true });

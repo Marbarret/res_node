@@ -37,42 +37,57 @@ const getUserByDocument = async (req, res) => {
 const createUser = async (req, res) => {
     try {
         const { responsible, password } = req.body;
-        if (!responsible || !responsible.fullName || !responsible.document) {
+
+        if (!responsible || !responsible.fullName || !responsible.email) {
+            console.error("Dados obrigatórios ausentes.");
             return res.status(400).json({ mensagem: message.error.RES_REQUIRED_DOCUMENT });
         }
+
         if (!responsible.email || !/\S+@\S+\.\S+/.test(responsible.email)) {
+            console.error("E-mail inválido:", responsible.email);
             return res.status(400).json({ mensagem: message.error.INVALID_EMAIL });
         }
-        
-        if(!validations.isValidDocument(responsible.document)) {
-            return res.status(400).json({ mensagem: message.error.INVALID_DOCUMENT });
+
+        if (responsible.document?.number) {
+            if (!validations.isValidDocument(responsible.document)) {
+                console.error("Documento inválido:", responsible.document);
+                return res.status(400).json({ mensagem: message.error.INVALID_DOCUMENT });
+            }
+
+            const { number } = responsible.document;
+            const documentExists = await userService.checkDocumentExists(req.dbClient, number);
+            if (documentExists) {
+                console.error("Documento já existente:", number);
+                return res.status(401).json({ mensagem: message.error.DOC_ALREADY_EXISTS });
+            }
         }
-        
-        const { number } = responsible.document;
-        const documentExists = await userService.checkDocumentExists(req.dbClient, number);
-        if (documentExists) {
-            return res.status(401).json({ mensagem: message.error.DOC_ALREADY_EXISTS });
-        }
+
         const hashedPassword = await bcrypt.hash(password, 10);
         responsible.password = hashedPassword;
 
+        responsible.verification = responsible.verification || {};
         responsible.verification.code = helpers.generateVerificationCode();
         responsible.isVerified = false;
+
         try {
             await emailSender.sendVerificationEmail(responsible.email, responsible.verification.code);
         } catch (emailError) {
+            console.error("Erro ao enviar e-mail:", emailError);
             return res.status(500).json({ mensagem: message.error.EMAIL_NOT_SENT });
         }
-        
+
         const entity = await userService.createNewUser(req.dbClient, responsible);
-        return res.status(201).json({ 
+        return res.status(201).json({
             mensagem: message.success.USER_CREATED,
             usuario: { id: entity._id, fullName: responsible.fullName, email: responsible.email }
         });
+
     } catch (error) {
+        console.error("Erro inesperado ao criar usuário:", error);
         return res.status(500).json({ mensagem: message.error.ERROR_CREATED_USER });
     }
 };
+
 
 const updateUser = async (req, res) => {
     const document = req.params.document;
@@ -145,12 +160,15 @@ const verifyUser = async (req, res) => {
             return res.status(404).json({ mensagem: message.error.FIND_USER_ERROR });
         }
 
-        if (user.verificationCode !== verificationCode) {
+        if (user.verification?.code !== verificationCode) {
             return res.status(400).json({ mensagem: message.error.INVALID_VERIFICATION_CODE });
         }
+
         await userService.verifyUser(req.dbClient, email, verificationCode);
-        return res.status(200).json({ mensagem:  message.success.VERIFICATION_SUCCESSFUL });
+
+        return res.status(200).json({ mensagem: message.success.VERIFICATION_SUCCESSFUL });
     } catch (error) {
+        console.error("Erro ao verificar usuário:", error);
         return res.status(400).json({ mensagem: message.error.ERROR_VERIFYING_USER });
     }
 };

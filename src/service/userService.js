@@ -52,10 +52,10 @@ const verifyUser = async (dbClient, email, verificationCode) => {
         throw new Error('Usuário não encontrado.');
     }
 
-    if (user.verificationCode === verificationCode) {
+    if (user.verification?.code === verificationCode) {
         await collection.updateOne(
             { email },
-            { $set: { isVerified: true }, $unset: { verificationCode: "" } }
+            { $set: { isVerified: true }, $unset: { "verification.code": "" } }
         );
         return { mensagem: 'Usuário verificado com sucesso!' };
     } else {
@@ -63,11 +63,12 @@ const verifyUser = async (dbClient, email, verificationCode) => {
     }
 };
 
+
 const updateUser = async (dbClient, document, updates) => {
     try {
         const collection = getCollectionDB(dbClient, db_name, collection_name);
         return await collection.updateOne(
-            { 'document.number': document},
+            { 'document.number': document },
             { $set: updates }
         );
     } catch (error) {
